@@ -50,6 +50,8 @@ public class User extends Model<User> implements Serializable {
     @TableField("id")
     private String id;
 
+    @TableField("status")
+    private String status;
 
     @Override
     protected Serializable pkVal() {

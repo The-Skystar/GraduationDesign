@@ -44,12 +44,12 @@ public class IdCardController {
      * @throws Exception
      */
     @PostMapping("/authenFront")
-    public ResultVO authenFront(/*@RequestParam("fcard")MultipartFile file,*/@RequestParam("realname")String userId) throws Exception{
+    public ResultVO authenFront(@RequestParam("fcard")MultipartFile file,@RequestParam("realname")String userId) throws Exception{
         String ak = "vvoaRorsjeDdYZCbDanHsSYp";
         String sk = "adURe3KwH9rzZBELTqvHIWjWaD1jUxzF";
         String path = "E://正.jpg";
-        byte[] imgData = FileUtil.readFileByBytes(path);
-//        byte[] imgData = file.getBytes();
+//        byte[] imgData = FileUtil.readFileByBytes(path);
+        byte[] imgData = file.getBytes();
         String imgStr = Base64Util.encode(imgData);
         // 识别身份证正面id_card_side=front;识别身份证背面id_card_side=back;
         String params = "id_card_side=front&" + URLEncoder.encode("image", "UTF-8") + "="
@@ -69,12 +69,12 @@ public class IdCardController {
      * @throws Exception
      */
     @PostMapping("/authenBack")
-    public ResultVO authenBack(/*@RequestParam("bcard")MultipartFile file,*/@RequestParam("realname")String userId) throws Exception{
+    public ResultVO authenBack(@RequestParam("bcard")MultipartFile file,@RequestParam("realname")String userId) throws Exception{
         String ak = "vvoaRorsjeDdYZCbDanHsSYp";
         String sk = "adURe3KwH9rzZBELTqvHIWjWaD1jUxzF";
         String path = "E://反.jpg";
-        byte[] imgData = FileUtil.readFileByBytes(path);
-//        byte[] imgData = file.getBytes();
+//        byte[] imgData = FileUtil.readFileByBytes(path);
+        byte[] imgData = file.getBytes();
         String imgStr = Base64Util.encode(imgData);
         // 识别身份证正面id_card_side=front;识别身份证背面id_card_side=back;
         String params = "id_card_side=back&" + URLEncoder.encode("image", "UTF-8") + "="

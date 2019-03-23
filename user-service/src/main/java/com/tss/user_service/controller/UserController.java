@@ -3,7 +3,9 @@ package com.tss.user_service.controller;
 import com.baidu.aip.face.AipFace;
 import com.baidu.aip.util.Base64Util;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
+import com.tss.user_service.Enum.ErrorEnums;
 import com.tss.user_service.entity.User;
+import com.tss.user_service.exception.MyException;
 import com.tss.user_service.service.UserService;
 import com.tss.user_service.util.*;
 import com.tss.user_service.vo.ResultVO;
@@ -14,13 +16,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLEncoder;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 public class UserController {
@@ -102,5 +98,14 @@ public class UserController {
         return userService.sendEmial(from,email,content,"验证码");
     }
 
-
+    /**
+     * 邮箱验证码登录,手机验证码登录要收取服务费，目前不支持
+     * @param email
+     * @param ver
+     * @return
+     * @throws Exception
+     */
+    public ResultVO emailLogin(String email,String ver) throws Exception{
+        return userService.emailLogin(email,ver);
+    }
 }

@@ -81,9 +81,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         userList.add(userMapper.getUserByEmail(str));
         userList.add(userMapper.getUserByNick(str));
         userList.removeAll(Collections.singleton(null));
-        if (userList.size()>1){
-
-        } else if (userList.size()==0){
+        if (userList.size()==0){
             resultVO.setCode(0);
             resultVO.setMsg("用户不存在");
         } else if (userList.size()==1&&pwd.equals(userList.get(0).getPwd())){
