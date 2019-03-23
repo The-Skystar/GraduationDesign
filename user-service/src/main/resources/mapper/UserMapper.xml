@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tss.user_service.mapper.UserMapper">
+
+    <select id="getUserByNick" resultType="com.tss.user_service.entity.User">
+        select * from tss.tb_user t where t.user_nick = #{nick}
+    </select>
+
+    <select id="getUserByPhone" resultType="com.tss.user_service.entity.User">
+        select * from tss.tb_user t where t.phone = #{phone}
+    </select>
+
+    <select id="getUserByEmail" resultType="com.tss.user_service.entity.User">
+        select * from tss.tb_user t where t.email = #{email}
+    </select>
+</mapper>
