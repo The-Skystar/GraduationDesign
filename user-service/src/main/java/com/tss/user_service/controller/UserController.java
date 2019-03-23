@@ -76,7 +76,12 @@ public class UserController {
         return userService.pwdLogin(str,pwd);
     }
 
-
+    /**
+     * 向指定手机号发送验证码
+     * @param phone
+     * @return
+     * @throws Exception
+     */
     @PostMapping(value = "/sendMsg/{phone}")
     public String getMsg(@PathVariable String phone) throws Exception{
         String ver = sendMsgUtil.getRandNum();
@@ -87,6 +92,12 @@ public class UserController {
         return userService.sendMsg("1485146617",param,phone);
     }
 
+    /**
+     * 向指定邮箱发送验证码，过期时间为5分钟
+     * @param email
+     * @return
+     * @throws Exception
+     */
     @PostMapping("/sendEmail/{email}")
     public ResultVO sendEmail(@PathVariable String email) throws Exception{
         String ver = sendMsgUtil.getRandNum();
