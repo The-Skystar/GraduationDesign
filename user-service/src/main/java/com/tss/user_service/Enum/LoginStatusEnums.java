@@ -1,6 +1,10 @@
 package com.tss.user_service.Enum;
 
 public enum LoginStatusEnums {
+    REGIST("1","注册"),
+    LOGIN("2","已登陆"),
+    CANCLE("3","注销"),
+    LOCK("4","冻结")
     ;
 
     private String code;
