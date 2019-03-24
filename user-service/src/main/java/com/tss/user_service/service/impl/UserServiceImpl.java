@@ -2,6 +2,7 @@ package com.tss.user_service.service.impl;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
+import com.tss.user_service.Enum.LoginStatusEnums;
 import com.tss.user_service.entity.User;
 import com.tss.user_service.mapper.UserMapper;
 import com.tss.user_service.service.UserService;
@@ -49,6 +50,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public ResultVO regist(User user) throws Exception{
         user.setPwd(encryptUtil.MD5(user.getPwd()));
         user.setId(encryptUtil.MD5(user.getId()));
+        user.setStatus(LoginStatusEnums.REGIST.getCode());
         if (userMapper.insert(user)==1){
             resultVO.setCode(1);
             resultVO.setMsg("注册成功");
@@ -84,12 +86,27 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (userList.size()==0){
             resultVO.setCode(0);
             resultVO.setMsg("用户不存在");
+        } else if (userList.size()==1&&userList.get(0).getStatus()!=LoginStatusEnums.REGIST.getCode()){
+            User user = userList.get(0);
+            resultVO.setCode(3);
+            if (LoginStatusEnums.LOGIN.getCode().equals(user.getStatus())){
+                resultVO.setMsg("账户已在其他地方登录");
+            }
+            if (LoginStatusEnums.CANCLE.getCode().equals(user.getStatus())){
+                resultVO.setMsg("该账户已注销");
+            }
+            if (LoginStatusEnums.LOCK.getCode().equals(user.getStatus())){
+                resultVO.setMsg("该账户已冻结");
+            }
+            return resultVO;
         } else if (userList.size()==1&&pwd.equals(userList.get(0).getPwd())){
             User user = userList.get(0);
             String token = jwtToken.createToken(user.getUserNick());
             if (redisUtil.get(user.getUserNick())==null)
                 redisUtil.set(user.getUserNick(),token);
             redisUtil.expire(user.getUserNick(),validity);
+            user.setStatus(LoginStatusEnums.LOGIN.getCode());
+            userMapper.updateById(user);
             resultVO.setCode(1);
             resultVO.setMsg(token);
             resultVO.setData(user);
@@ -127,8 +144,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (user==null){
             resultVO.setCode(-2);
             resultVO.setMsg("邮箱未注册");
-        }
-        if (redisUtil.get(email)==null){
+        } else if (LoginStatusEnums.LOGIN.getCode().equals(user.getStatus())){
+            resultVO.setCode(-1);
+            resultVO.setMsg("账户已在其他地方登录");
+        } else if (LoginStatusEnums.CANCLE.getCode().equals(user.getStatus())){
+            resultVO.setCode(-1);
+            resultVO.setMsg("该账户已注销");
+        } else if (LoginStatusEnums.LOCK.getCode().equals(user.getStatus())){
+            resultVO.setCode(-1);
+            resultVO.setMsg("该账户已冻结");
+        } else if (redisUtil.get(email)==null){
             resultVO.setCode(-1);
             resultVO.setMsg("验证码已过期");
         }else if (ver.equals(redisUtil.get(email))){
@@ -136,6 +161,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             if (redisUtil.get(email)==null)
                 redisUtil.set(email,token);
             redisUtil.expire(email,validity);
+            user.setStatus(LoginStatusEnums.LOGIN.getCode());
+            userMapper.updateById(user);
             resultVO.setCode(1);
             resultVO.setMsg("登录成功");
             resultVO.setData(user);
