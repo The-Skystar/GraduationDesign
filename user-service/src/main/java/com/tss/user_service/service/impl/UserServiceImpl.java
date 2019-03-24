@@ -99,7 +99,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 resultVO.setMsg("该账户已冻结");
             }
             return resultVO;
-        } else if (userList.size()==1&&pwd.equals(userList.get(0).getPwd())){
+        } else if (userList.size()==1&&encryptUtil.MD5(pwd).equals(userList.get(0).getPwd())){
             User user = userList.get(0);
             String token = jwtToken.createToken(user.getUserNick());
             if (redisUtil.get(user.getUserNick())==null)

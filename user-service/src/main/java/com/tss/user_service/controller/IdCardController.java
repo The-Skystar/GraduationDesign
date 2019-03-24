@@ -1,13 +1,9 @@
 package com.tss.user_service.controller;
 
 import com.baidu.aip.util.Base64Util;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.tss.user_service.config.DateConverterConfig;
 import com.tss.user_service.entity.IdCard;
 import com.tss.user_service.service.IdCardService;
 import com.tss.user_service.util.FastJsonUtils;
-import com.tss.user_service.util.FileUtil;
 import com.tss.user_service.util.RedisUtil;
 import com.tss.user_service.vo.ResultVO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -97,12 +93,5 @@ public class IdCardController {
         return idCardService.authen(userId);
     }
 
-    @PostMapping("/test")
-    public String test() throws Exception{
-        System.out.println(FastJsonUtils.getJsonToBean(redisUtil.get("4616655ebd4e4100a7ef64aa7a478011front"),IdCard.class).getBirthday());
-        System.out.println(FastJsonUtils.getJsonToBean(redisUtil.get("4616655ebd4e4100a7ef64aa7a478011back"),IdCard.class).toString());
-        System.out.println();
-        return null;
-    }
 
 }
