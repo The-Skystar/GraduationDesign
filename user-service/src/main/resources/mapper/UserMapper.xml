@@ -13,4 +13,8 @@
     <select id="getUserByEmail" resultType="com.tss.user_service.entity.User">
         select * from tss.tb_user t where t.email = #{email}
     </select>
+
+    <update id="setDefaultAddress">
+        update tss.tb_user t set t.default_address = #{addressId,jdbcType=VARCHAR} where t.user_id = #{userId,jdbcType=VARCHAR}
+    </update>
 </mapper>

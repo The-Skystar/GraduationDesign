@@ -3,6 +3,9 @@ package com.tss.user_service.entity;
 import com.baomidou.mybatisplus.activerecord.Model;
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableId;
+import com.baomidou.mybatisplus.annotations.TableName;
+import lombok.Data;
+import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -12,6 +15,8 @@ import java.util.Date;
  * @date ：Created in 2019/3/24 13:51
  * @description：地址信息类
  */
+@Data
+@TableName("tss.tb_address")
 public class Address extends Model<Address> implements Serializable {
 
     @TableId("address_id")
@@ -49,6 +54,8 @@ public class Address extends Model<Address> implements Serializable {
 
     @TableField("area")
     private String area;
+
+    private transient String isDefault;
 
     @Override
     protected Serializable pkVal() {

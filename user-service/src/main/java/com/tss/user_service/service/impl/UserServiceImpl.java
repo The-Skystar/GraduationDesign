@@ -32,6 +32,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     private ResultVO resultVO;
 
     @Autowired
+    private UserVO userVO;
+
+    @Autowired
     private EncryptUtil encryptUtil;
 
     @Autowired
@@ -179,7 +182,4 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return resultVO;
     }
 
-//    private UserVO userToUserVO(User user){
-//
-//    }
 }
