@@ -1,4 +1,4 @@
-package com.tss.user_service.entity;
+package com.tss.user_service.vo;
 
 import com.baomidou.mybatisplus.activerecord.Model;
 import com.baomidou.mybatisplus.annotations.TableField;
@@ -13,48 +13,37 @@ import java.util.Date;
 
 @Data
 @Component
-@TableName("tss.tb_user")
-public class User extends Model<User> implements Serializable {
+public class UserVO extends Model<UserVO> implements Serializable {
 
-    @TableId("user_id")
     private String userId;
 
-    @TableField("user_nick")
     private String userNick;
 
-    @TableField("realname")
     private String realname;
 
-    @TableField("pwd")
     private String pwd;
 
-    @TableField("email")
     private String email;
 
-    @TableField("phone")
     private String phone;
 
-    @TableField("tel")
     private String tel;
 
-    @TableField("regist_time")
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date registTime;
 
-    @TableField("default_address")
     private String defaultAddress;
 
-    @TableField("permis")
     private String permis;
 
-    @TableField("id")
     private String id;
 
-    @TableField("status")
-    private String status;
+    private String statusKey;
 
-    @TableField("sex")
-    private String sex;
+    private String statusValue;
+
+    private String sexKey;
+
+    private String sexValue;
 
     @Override
     protected Serializable pkVal() {

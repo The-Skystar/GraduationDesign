@@ -3,6 +3,7 @@ package com.tss.user_service.service.impl;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
 import com.tss.user_service.Enum.LoginStatusEnums;
+import com.tss.user_service.Enum.SexEnums;
 import com.tss.user_service.entity.User;
 import com.tss.user_service.mapper.UserMapper;
 import com.tss.user_service.service.UserService;
@@ -11,6 +12,7 @@ import com.tss.user_service.util.JwtToken;
 import com.tss.user_service.util.RedisUtil;
 import com.tss.user_service.util.SendMsgUtil;
 import com.tss.user_service.vo.ResultVO;
+import com.tss.user_service.vo.UserVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -51,6 +53,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         user.setPwd(encryptUtil.MD5(user.getPwd()));
         user.setId(encryptUtil.MD5(user.getId()));
         user.setStatus(LoginStatusEnums.REGIST.getCode());
+        if ("男".equals(user.getSex()) || "1".equals(user.getSex()))
+            user.setSex(SexEnums.MAN.getCode());
+        if ("女".equals(user.getSex()) || "0".equals(user.getSex()))
+            user.setSex(SexEnums.WOMAN.getCode());
         if (userMapper.insert(user)==1){
             resultVO.setCode(1);
             resultVO.setMsg("注册成功");
@@ -172,4 +178,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
         return resultVO;
     }
+
+//    private UserVO userToUserVO(User user){
+//
+//    }
 }
