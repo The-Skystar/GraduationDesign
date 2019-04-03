@@ -1,0 +1,119 @@
+# Tomcat
+server:
+  tomcat:
+    uri-encoding: UTF-8
+    max-threads: 1000
+    min-spare-threads: 30
+  port: 8081
+  connection-timeout: 5000
+#datasource
+spring:
+  datasource:
+    url: jdbc:oracle:thin:@localhost:1521/orcl
+    username: tss
+    password: theskystar
+    type: com.alibaba.druid.pool.DruidDataSource
+    driver-class-name: oracle.jdbc.OracleDriver
+    initialSize: 5
+    minIdle: 5
+    maxActive: 20
+    maxWait: 60000
+    timeBetweenEvictionRunsMillis: 60000
+    minEvictableIdleTimeMillis: 300000
+    validationQuery: SELECT 1 FROM DUAL
+    testWhileIdle: true
+    testOnBorrow: false
+    testOnReturn: false
+    poolPreparedStatements: true
+    maxPoolPreparedStatementPerConnectionSize: 20
+    spring.datasource.filters: stat,wall,log4j
+    connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
+  # jackson时间格式化
+  jackson:
+    time-zone: GMT+8
+    date-format: yyyy-MM-dd HH:mm:ss
+  thymeleaf:
+    cache: false
+    prefix: classpath:/templates/
+    suffix: .html
+    mode: HTML5
+    encoding: UTF-8
+  resources: # 指定静态资源的路径
+    static-locations: classpath:/static/,classpath:/views/
+  mvc:
+    view:
+      prefix: /WEB-INF/
+      suffix: .jsp
+  redis:
+    database: 0
+    host: 127.0.0.1
+    port: 6379
+    password: 683280
+    timeout: 1000
+    pool:
+      max-active: 8
+      max-wait: -1
+      max-idle: 8
+      min-idle: 0
+  mail:
+    host: smtp.qq.com    #邮箱服务器地址
+    username: 1054632915@qq.com   #邮箱账号
+    password: rifcbfzgcmnzbaif            #邮箱密码
+    default-encoding: utf-8    #默认编码
+    port: 465
+    properties:
+      mail:
+        smtp:
+          socketFactory:
+            port: 465
+            class: javax.net.ssl.SSLSocketFactory
+            fallback: false
+          auth: true
+          starttls:
+            enable: true
+            required: true
+# Mybatis-Plus 配置
+mybatis-plus:
+  mapper-locations: classpath:/mapper/*Mapper.xml
+  typeAliasesPackage: com.tss.user_service.entity
+  #  global-config:
+  #    id-type: 2
+  #    field-strategy: 2
+  #    db-column-underline: true
+  #    refresh-mapper: true
+  #    #capital-mode: true
+  #    #key-generator: com.baomidou.springboot.xxx
+  #    logic-delete-value: 0
+  #    logic-not-delete-value: 1
+  #    sql-injector: com.baomidou.mybatisplus.mapper.LogicSqlInjector
+  #    #meta-object-handler: com.baomidou.springboot.xxx
+  #    #sql-injector: com.baomidou.springboot.xxx
+  #  configuration:
+  #    map-underscore-to-camel-case: true
+  #    cache-enabled: false
+  global-config:
+    id-type: 3  #0:数据库ID自增   1:用户输入id  2:全局唯一id(IdWorker)  3:全局唯一ID(uuid)
+    db-column-underline: false
+    refresh-mapper: true
+  configuration:
+    map-underscore-to-camel-case: true
+    cache-enabled: true #配置的缓存的全局开关
+    lazyLoadingEnabled: false #延时加载的开关
+    multipleResultSetsEnabled: false #开启的话，延时加载一个属性时会加载该对象全部属性，否则按需加载属性
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl #打印sql语句,调试用
+# 沙箱账号
+pay:
+  alipay:
+    gatewayUrl: https://openapi.alipaydev.com/gateway.do
+    appid: 2016092700609276
+    #应用私钥
+    appPrivateKey: MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCuxLXotGs0LWSPwnCCAoZdOHCnmujs6YTHJT9kq7k7NrsBaLhI46D24KRgg84hZD9HC+c7QVBq1BoEjR358Pum/S2xUiOQyXdJVJP4rzc/iZmnq1PgKoEktgvKHlPsLIEKy4lHjJuibYhDeDjBCkIuDJIv2ahZOkJtNMdht7CPE6xhQb/OgOPhfmKk3RRqZkO9LqXPxdk3egWCDZwT8vKUwEwL5FCaGXKsTmaATyvqL+WrplpbM8Ez/4AdvaVqBJLS4GzhTfqmJmTZ4JOVlJMQYY9X5MLsPPiQngX3zplK6NK9zQ5PSB+xaYLxJjWSlNjQ9r7QKjppLt4XpscpUzNxAgMBAAECggEBAKyEh6Enf++oo2z5nj/oKCSbUzFPzIAY37YJwbMphJa8Jwt0CP4CnWE2TWzsjy0NHR2P1Xj7t1tM9kXp215fkLq9jz5L+8mv5i2f7NV+eMYimWgWypwsuQC5J5gkKemn4NX8Jw5W8Ub8YpdfdH6yFrQIOsI7VGCIDwxoHi0Ku6HvPr3E5knBA7SejkH6qBwlEDAlnNifmzU51YM/RiFD29kerH9ofIpyhobQq7YFFkDI7VU6+xVqR8/c2/N9ZpDmL845l77HLMAnGVOhN1S5BGKzBKMqjLI3yzvMiFVACNn2ux4k0cJYT1R7YS7VowEVgK9Ozj8/HkGOEvrDJDvdX/UCgYEA9Dgxe9sEeYON9Kp1GuifRCWyyEcgOZN+fyEt9emuyPKKyTAFwbq/D+f34obUjZftiT9tk9nzLwJyL5gKEAjPA0zxjvi8y3KZuRBh46yI6pIGYiFusrxaVC2A8LC6sqC07jWe594mC+2p2QjFvZIsCM3W65NP5HnCltkumzoWUecCgYEAtzLh9WgwaaHi6ppBcIXkX/66CkfCf+Wen7g9jweK1Dj5dHput6KmbTFUOOWPOei7r9O2QGEvnSBpMsdommp+YZ1YkQDzj5+9Fbukh5A+5Rs8X3Cskc/4TkXzSH/330PWOP9y9iHjDY2AUaaI1RQwcJwoRHu2+PupP3sRmi5E1OcCgYEAy6VkFgyvMYiywfe2CQc7b78j0wAEbh6A2A/Z3HrNZgFiG5vw4PgRRHlBamLWMXAkAlOi0yxmLagTgX59vZsqzGzH7VmbTOc2Kmzvw8NmtHup2QBZ569Kf3EmWQ510GhUF2MdK+pBvaakADfhdE/Eal8CvZQsha/GxLU7uPL6E7cCgYBtoujxiiH3BagciKaDJc4P2Q0Tm/B9xDiTE5rbn0LpURORLrhV8+Qv0ua5ikCWAn9YcZZPnxn0qfHrLsWeK/9ogdcAKJaarJlniT2k16GcURlncLIGLXVHursm91arahipUc9GF++fK8DQnJ6lDokSy5GZsoRFK68VS5y0Ld6JnwKBgCtKYRpZIbq2QB+GFsq3x/TNnowVjbphFZeROfdaxFnzskf7ifM9wEM5Velpwc6qO2VtcKRhjSgQTp8z9XRGtjv4g+8W1XEr8gLVONrxQ7XiYKnrH41pg5hElIqxw5Bpvqg7mhRrJ2bPjDu4k8MMRJZoY2qp0VWXvA12JjTnoTXO
+    #支付宝公钥
+    alipayPublicKey: MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA05nItMloIT+CWIm1r1PsO4xprOHKFRQaQjBYlmkqJMyINbA2CqXKCFVwNpoRf1o6fWONED4lKorJaSZ5aMQlNTpRJCgOKrZcjiQs0zSUVb43FE077d/tIdYiIykvqsEgbS9Oh8gdihO0N1abCe9e/I4LpWa0pNqxDoiXqea2z2CDcNQjIIeXz4/9Qkbrx4n9yQfddONU6vGAo87+NAEHQ9B02N2Q2dIzw78N7rt0COfsoT7dFJRNPqAE5/xxpOTJ0HgrB7DG2yJhB8YMng3sgOdv9OSwDh+sl6Tb48ZIlix7SiuiO+Bq16PDJtFG9dkFfyzF2jG0GX8iycMaeEOwFwIDAQAB
+    returnUrl: https://www.baidu.com/
+#    notifyUrl: http://s9v2cw.natappfree.cc/alipay/notify
+
+
+
+
+

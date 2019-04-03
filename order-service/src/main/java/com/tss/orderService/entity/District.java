@@ -1,4 +1,4 @@
-package com.tss.user_service.entity;
+package com.tss.orderService.entity;
 
 import com.baomidou.mybatisplus.activerecord.Model;
 import com.baomidou.mybatisplus.annotations.TableField;

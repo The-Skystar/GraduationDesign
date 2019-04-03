@@ -1,8 +1,9 @@
-package com.tss.user_service.service;
+package com.tss.orderService.service;
+
 
 import com.baomidou.mybatisplus.service.IService;
-import com.tss.user_service.entity.District;
-import com.tss.user_service.vo.ResultVO;
+import com.tss.orderService.entity.District;
+import com.tss.orderService.vo.ResultVO;
 
 import java.util.List;
 

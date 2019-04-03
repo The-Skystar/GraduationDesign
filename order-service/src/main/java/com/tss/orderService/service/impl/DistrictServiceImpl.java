@@ -1,18 +1,19 @@
-package com.tss.user_service.service.impl;
+package com.tss.orderService.service.impl;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
-import com.tss.user_service.Enum.DistrictEnums;
-import com.tss.user_service.Enum.ErrorEnums;
-import com.tss.user_service.entity.District;
-import com.tss.user_service.exception.MyException;
-import com.tss.user_service.mapper.DistrictMapper;
-import com.tss.user_service.service.DistrictService;
-import com.tss.user_service.vo.ResultVO;
+import com.tss.orderService.Enum.DistrictEnums;
+import com.tss.orderService.Enum.ErrorEnums;
+import com.tss.orderService.entity.District;
+import com.tss.orderService.exception.MyException;
+import com.tss.orderService.mapper.DistrictMapper;
+import com.tss.orderService.service.DistrictService;
+import com.tss.orderService.vo.ResultVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+
 
 /**
  * @author ：xiangjun.yang

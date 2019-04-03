@@ -1,9 +1,11 @@
-package com.tss.user_service.controller;
+package com.tss.orderService.controller;
 
-import com.tss.user_service.service.DistrictService;
-import com.tss.user_service.vo.ResultVO;
+
+import com.tss.orderService.service.DistrictService;
+import com.tss.orderService.vo.ResultVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
  * @description：行政区划控制层
  */
 @RestController
+@RequestMapping("/district")
 public class DistrictController {
 
     @Autowired
