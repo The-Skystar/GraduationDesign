@@ -41,7 +41,7 @@ public class EncryptUtil {
 
     public static EncryptUtil me;
 
-    private EncryptUtil() {
+    public EncryptUtil() {
         //单例
     }
 

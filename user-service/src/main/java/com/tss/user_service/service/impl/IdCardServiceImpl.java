@@ -1,10 +1,9 @@
 package com.tss.user_service.service.impl;
 
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
-import com.baomidou.mybatisplus.toolkit.StringUtils;
-import com.ctc.wstx.util.StringUtil;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.tss.user_service.Enum.ReturnStatusEnums;
 import com.tss.user_service.config.DateConverterConfig;
 import com.tss.user_service.entity.IdCard;
 import com.tss.user_service.entity.User;
@@ -110,7 +109,8 @@ public class IdCardServiceImpl extends ServiceImpl<IdCardMapper, IdCard> impleme
         if (getCard(result,"失效日期")!=null && getCard(result,"失效日期").length()==8)
             idCard.setValidity(dateConverter.convert(dateFormat(getCard(result,"失效日期"))));
         idCard.setInst(getCard(result,"签发机关"));
-        resultVO.setCode(0);
+        resultVO.setCode(ReturnStatusEnums.RECO_SUCCESS.getCode());
+        resultVO.setMsg(ReturnStatusEnums.RECO_SUCCESS.getMsg());
         resultVO.setData(idCard);
         return resultVO;
     }
@@ -124,21 +124,21 @@ public class IdCardServiceImpl extends ServiceImpl<IdCardMapper, IdCard> impleme
                 isNotNull(idCardFront.getId()) &&isNotNull(idCardBack.getInst()) &&
                 idCardFront.getBirthday()!=null && idCardBack.getIssued()!=null && idCardBack.getValidity()!=null;
         if (!flag){
-            resultVO.setCode(-1);
-            resultVO.setMsg("实名认证失败");
+            resultVO.setCode(ReturnStatusEnums.RECO_NOT_COMPLETE.getCode());
+            resultVO.setMsg(ReturnStatusEnums.RECO_NOT_COMPLETE.getMsg());
             resultVO.setData(null);
             return resultVO;
         }
         if (!IdcardUtils.validateCard(idCardFront.getId())){
-            resultVO.setCode(-2);
-            resultVO.setMsg("实名认证失败");
+            resultVO.setCode(ReturnStatusEnums.RECO_NOT_LEGAL.getCode());
+            resultVO.setMsg(ReturnStatusEnums.RECO_NOT_LEGAL.getMsg());
             resultVO.setData(null);
             return resultVO;
         }
         User user = userMapper.selectById(userId);
         if (!idCardFront.getName().equals(user.getRealname())){
-            resultVO.setCode(-3);
-            resultVO.setMsg("真实姓名与身份证不符");
+            resultVO.setCode(ReturnStatusEnums.NAME_NOT_MATCH.getCode());
+            resultVO.setMsg(ReturnStatusEnums.NAME_NOT_MATCH.getMsg());
             resultVO.setData(null);
             return resultVO;
         }
@@ -153,13 +153,13 @@ public class IdCardServiceImpl extends ServiceImpl<IdCardMapper, IdCard> impleme
         idCard.setInst(idCardBack.getInst());
         idCard.setUserId(userId);
         if (idCardMapper.insert(idCard)==1){
-            resultVO.setCode(1);
-            resultVO.setMsg("实名认证通过");
+            resultVO.setCode(ReturnStatusEnums.AUTHEN_SUCCESS.getCode());
+            resultVO.setMsg(ReturnStatusEnums.AUTHEN_SUCCESS.getMsg());
             resultVO.setData(idCard);
             return resultVO;
         }else {
-            resultVO.setCode(-4);
-            resultVO.setMsg("实名认证失败");
+            resultVO.setCode(ReturnStatusEnums.SYS_ERROR.getCode());
+            resultVO.setMsg(ReturnStatusEnums.SYS_ERROR.getMsg());
             resultVO.setData(null);
             return resultVO;
         }

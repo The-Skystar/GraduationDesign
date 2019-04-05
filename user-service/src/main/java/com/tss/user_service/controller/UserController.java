@@ -100,6 +100,8 @@ public class UserController {
      */
     @PostMapping("/sendEmail/{email}")
     public ResultVO sendEmail(@PathVariable String email) throws Exception{
+        if (redisUtil.get(email)!=null)
+            redisUtil.del(email);
         String ver = sendMsgUtil.getRandNum();
         int time = 5;
         redisUtil.set(email,ver);
@@ -116,7 +118,36 @@ public class UserController {
      * @return
      * @throws Exception
      */
+    @PostMapping("/emailLogin")
     public ResultVO emailLogin(String email,String ver) throws Exception{
         return userService.emailLogin(email,ver);
     }
+
+    /**
+     * 修改用户个人信息
+     * @param user
+     * @return
+     * @throws Exception
+     */
+    @PostMapping("/updUser")
+    public ResultVO updUser(User user) throws Exception{
+        return userService.updUser(user);
+    }
+
+    /**
+     * 修改用户密码，使用原密码修改时，传参为userId，oldPwd，newPwd
+     * 使用邮箱验证码修改时，传参为userId，newPwd，email，ver
+     * @param userId
+     * @param oldPwd
+     * @param newPwd
+     * @param email
+     * @param ver
+     * @return
+     * @throws Exception
+     */
+    @PostMapping("/updPwd")
+    public ResultVO updPwd(String userId,String oldPwd,String newPwd,String email,String ver) throws Exception{
+        return userService.updPwd(userId,oldPwd,newPwd,email,ver);
+    }
+
 }

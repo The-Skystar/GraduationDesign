@@ -57,4 +57,23 @@ public interface UserService extends IService<User> {
      */
     public ResultVO emailLogin(String email, String ver) throws Exception;
 
+    /**
+     * 修改用户个人信息
+     * @param user
+     * @return
+     * @throws Exception
+     */
+    public ResultVO updUser(User user) throws Exception;
+
+    /**
+     * 修改用户密码
+     * @param id
+     * @param oldPwd
+     * @param newPwd
+     * @param email
+     * @param ver
+     * @return
+     * @throws Exception
+     */
+    public ResultVO updPwd(String id,String oldPwd,String newPwd,String email,String ver) throws Exception;
 }
