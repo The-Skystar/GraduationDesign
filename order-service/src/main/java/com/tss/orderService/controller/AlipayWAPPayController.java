@@ -17,6 +17,7 @@ import com.alipay.api.response.AlipayTradeRefundResponse;
 import com.tss.orderService.config.DateConverterConfig;
 import com.tss.orderService.entity.AlipayProperties;
 import com.tss.orderService.entity.Pay;
+import com.tss.orderService.service.PayService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -56,6 +57,8 @@ public class AlipayWAPPayController {
     @Autowired
     private DateConverterConfig dateConverterConfig;
 
+    @Autowired
+    private PayService payService;
     /**
      * 去支付
      *
@@ -127,6 +130,7 @@ public class AlipayWAPPayController {
             pay.setTotal(Float.parseFloat(request.getParameter("total_amount")));
             pay.setPayTime(dateConverterConfig.convert(request.getParameter("timestamp")));
             pay.setWay("支付宝");
+            payService.insert(pay);
             //商户订单号
             String out_trade_no = new String(request.getParameter("out_trade_no").getBytes("ISO-8859-1"),"UTF-8");
             //支付宝交易号

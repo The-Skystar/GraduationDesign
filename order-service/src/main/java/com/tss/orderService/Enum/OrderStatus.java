@@ -1,8 +1,11 @@
 package com.tss.orderService.Enum;
 
-public enum SexEnums {
-    MAN("1","男"),
-    WOMAN("0","女")
+public enum OrderStatus {
+    DROP_ORDER("1","已下单"),
+    PAY("2","已支付"),
+    TRANSPORT("3","运送中"),
+    RECEIPT("4","已收货"),
+    ABANNDONED("15","废弃")
     ;
     private String code;
 
@@ -24,7 +27,7 @@ public enum SexEnums {
         this.value = value;
     }
 
-    SexEnums(String code, String value) {
+    OrderStatus(String code, String value) {
         this.code = code;
         this.value = value;
     }
