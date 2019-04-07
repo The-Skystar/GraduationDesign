@@ -114,9 +114,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         } else if (userList.size()==1&&encryptUtil.MD5(pwd).equals(userList.get(0).getPwd())){
             User user = userList.get(0);
             String token = jwtToken.createToken(user.getUserNick());
-            if (redisUtil.get(user.getUserNick())==null || redisUtil.get(user.getUserNick()).length()==0)
+            if (redisUtil.get(user.getUserNick())==null || redisUtil.get(user.getUserNick()).length()==0){
                 redisUtil.set(user.getUserNick(),token);
+                redisUtil.set(token,user.getUserId());
+            }
             redisUtil.expire(user.getUserNick(),validity);
+            redisUtil.expire(token,validity);
             user.setStatus(LoginStatusEnums.LOGIN.getCode());
             userMapper.updateById(user);
             resultVO.setCode(ReturnStatusEnums.LOGIN_SUCCESS.getCode());
@@ -170,9 +173,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             resultVO.setMsg(ReturnStatusEnums.CODE_EXPIRED.getMsg());
         }else if (ver.equals(redisUtil.get(email))){
             String token = jwtToken.createToken(email);
-            if (redisUtil.get(email)==null || redisUtil.get(email).length()==0)
+            if (redisUtil.get(email)==null || redisUtil.get(email).length()==0){
                 redisUtil.set(email,token);
+                redisUtil.set(token,user.getUserId());
+            }
             redisUtil.expire(email,validity);
+            redisUtil.expire(token,validity);
             user.setStatus(LoginStatusEnums.LOGIN.getCode());
             userMapper.updateById(user);
             resultVO.setCode(ReturnStatusEnums.LOGIN_SUCCESS.getCode());
