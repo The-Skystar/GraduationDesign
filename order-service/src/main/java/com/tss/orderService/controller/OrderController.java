@@ -1,8 +1,9 @@
 package com.tss.orderService.controller;
 
 import com.alibaba.fastjson.JSONObject;
+import com.tss.orderService.annotations.LoginRequired;
 import com.tss.orderService.service.OrderService;
-import com.tss.orderService.vo.OrderVO;
+import com.tss.orderService.util.RedisUtil;
 import com.tss.orderService.vo.ResultVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -22,6 +23,10 @@ public class OrderController {
     @Autowired
     private OrderService orderService;
 
+    @Autowired
+    private RedisUtil redisUtil;
+
+    @LoginRequired
     @RequestMapping(value = "/create",method = RequestMethod.POST,produces = "application/json;charset=UTF-8")
     public ResultVO createOrder(@RequestBody JSONObject orderVO) throws Exception{
         return orderService.createOrder(orderVO);
