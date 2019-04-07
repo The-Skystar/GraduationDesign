@@ -33,7 +33,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     private ResultVO resultVO;
 
     @Autowired
-    private UserVO userVO;
+    private User user;
 
     @Autowired
     private EncryptUtil encryptUtil;
@@ -57,17 +57,17 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         user.setPwd(encryptUtil.MD5(user.getPwd()));
         user.setId(encryptUtil.MD5(user.getId()));
         user.setStatus(LoginStatusEnums.REGIST.getCode());
-        if ("男".equals(user.getSex()) || "1".equals(user.getSex()))
+        if (SexEnums.MAN.getValue().equals(user.getSex()) || SexEnums.MAN.getCode().equals(user.getSex()))
             user.setSex(SexEnums.MAN.getCode());
-        if ("女".equals(user.getSex()) || "0".equals(user.getSex()))
+        if (SexEnums.WOMAN.getValue().equals(user.getSex()) || SexEnums.WOMAN.getCode().equals(user.getSex()))
             user.setSex(SexEnums.WOMAN.getCode());
         if (userMapper.insert(user)==1){
-            resultVO.setCode(1);
-            resultVO.setMsg("注册成功");
+            resultVO.setCode(ReturnStatusEnums.REGIST_SUCCESS.getCode());
+            resultVO.setMsg(ReturnStatusEnums.REGIST_SUCCESS.getMsg());
             return resultVO;
         }
-        resultVO.setCode(0);
-        resultVO.setMsg("注册失败");
+        resultVO.setCode(ReturnStatusEnums.REGIST_FAIL.getCode());
+        resultVO.setMsg(ReturnStatusEnums.REGIST_FAIL.getMsg());
         return resultVO;
     }
 
@@ -77,12 +77,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         wrapper.eq(column,value);
         Integer count = userMapper.selectCount(wrapper);
         if (count > 0){
-            resultVO.setCode(0);
-            resultVO.setMsg("已被占用");
+            resultVO.setCode(ReturnStatusEnums.OCCUPIED.getCode());
+            resultVO.setMsg(ReturnStatusEnums.OCCUPIED.getMsg());
             return resultVO;
         }
-        resultVO.setCode(1);
-        resultVO.setMsg("验证通过");
+        resultVO.setCode(ReturnStatusEnums.VALIDATE.getCode());
+        resultVO.setMsg(ReturnStatusEnums.VALIDATE.getMsg());
         return resultVO;
     }
 
@@ -93,43 +93,53 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         userList.add(userMapper.getUserByEmail(str));
         userList.add(userMapper.getUserByNick(str));
         userList.removeAll(Collections.singleton(null));
+
         if (userList.size()==0){
             resultVO.setCode(ReturnStatusEnums.ACCOUNT_ERROR.getCode());
             resultVO.setMsg(ReturnStatusEnums.ACCOUNT_ERROR.getMsg());
-        } else if (userList.size()==1&&userList.get(0).getStatus()!=LoginStatusEnums.REGIST.getCode()){
-            User user = userList.get(0);
-            if (LoginStatusEnums.LOGIN.getCode().equals(user.getStatus())){
-                resultVO.setCode(ReturnStatusEnums.LOGGED.getCode());
-                resultVO.setMsg(ReturnStatusEnums.LOGGED.getMsg());
-            }
-            if (LoginStatusEnums.CANCLE.getCode().equals(user.getStatus())){
-                resultVO.setCode(ReturnStatusEnums.CANALED.getCode());
-                resultVO.setMsg(ReturnStatusEnums.CANALED.getMsg());
-            }
-            if (LoginStatusEnums.LOCK.getCode().equals(user.getStatus())){
-                resultVO.setCode(ReturnStatusEnums.FROZEN.getCode());
-                resultVO.setMsg(ReturnStatusEnums.FROZEN.getMsg());
-            }
             return resultVO;
-        } else if (userList.size()==1&&encryptUtil.MD5(pwd).equals(userList.get(0).getPwd())){
-            User user = userList.get(0);
-            String token = jwtToken.createToken(user.getUserNick());
-            if (redisUtil.get(user.getUserNick())==null || redisUtil.get(user.getUserNick()).length()==0){
-                redisUtil.set(user.getUserNick(),token);
-                redisUtil.set(token,user.getUserId());
+        }else {
+            if (userList.size()==1&&!LoginStatusEnums.REGIST.getCode().equals(userList.get(0).getStatus())){
+                User user = userList.get(0);
+                if (LoginStatusEnums.LOGIN.getCode().equals(user.getStatus())){
+                    resultVO.setCode(ReturnStatusEnums.LOGGED.getCode());
+                    resultVO.setMsg(ReturnStatusEnums.LOGGED.getMsg());
+                    return resultVO;
+                }
+                if (LoginStatusEnums.CANCLE.getCode().equals(user.getStatus())){
+                    resultVO.setCode(ReturnStatusEnums.CANALED.getCode());
+                    resultVO.setMsg(ReturnStatusEnums.CANALED.getMsg());
+                    return resultVO;
+                }
+                if (LoginStatusEnums.LOCK.getCode().equals(user.getStatus())){
+                    resultVO.setCode(ReturnStatusEnums.FROZEN.getCode());
+                    resultVO.setMsg(ReturnStatusEnums.FROZEN.getMsg());
+                    return resultVO;
+                }
+                return resultVO;
+            }else {
+                if (userList.size()==1&&encryptUtil.MD5(pwd).equals(userList.get(0).getPwd())){
+                    User user = userList.get(0);
+                    String token = jwtToken.createToken(user.getUserId());
+                    if (redisUtil.get(user.getUserId())==null || redisUtil.get(user.getUserId()).length()==0){
+                        redisUtil.set(user.getUserId(),token);
+                        redisUtil.set(token,user.getUserId());
+                    }
+                    redisUtil.expire(user.getUserId(),validity);
+                    redisUtil.expire(token,validity);
+                    user.setStatus(LoginStatusEnums.LOGIN.getCode());
+                    userMapper.updateById(user);
+                    resultVO.setCode(ReturnStatusEnums.LOGIN_SUCCESS.getCode());
+                    resultVO.setMsg(token);
+                    resultVO.setData(user);
+                    return resultVO;
+                }else{
+                    resultVO.setCode(ReturnStatusEnums.PWD_ERROR.getCode());
+                    resultVO.setMsg(ReturnStatusEnums.PWD_ERROR.getMsg());
+                    return resultVO;
+                }
             }
-            redisUtil.expire(user.getUserNick(),validity);
-            redisUtil.expire(token,validity);
-            user.setStatus(LoginStatusEnums.LOGIN.getCode());
-            userMapper.updateById(user);
-            resultVO.setCode(ReturnStatusEnums.LOGIN_SUCCESS.getCode());
-            resultVO.setMsg(token);
-            resultVO.setData(user);
-        }else{
-            resultVO.setCode(ReturnStatusEnums.PWD_ERROR.getCode());
-            resultVO.setMsg(ReturnStatusEnums.PWD_ERROR.getMsg());
         }
-        return resultVO;
     }
 
     @Override
@@ -159,36 +169,42 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (user==null){
             resultVO.setCode(ReturnStatusEnums.MAIL_NOT_MATCH.getCode());
             resultVO.setMsg(ReturnStatusEnums.MAIL_NOT_MATCH.getMsg());
+            return resultVO;
         } else if (LoginStatusEnums.LOGIN.getCode().equals(user.getStatus())){
             resultVO.setCode(ReturnStatusEnums.LOGGED.getCode());
             resultVO.setMsg(ReturnStatusEnums.LOGGED.getMsg());
+            return resultVO;
         } else if (LoginStatusEnums.CANCLE.getCode().equals(user.getStatus())){
             resultVO.setCode(ReturnStatusEnums.CANALED.getCode());
             resultVO.setMsg(ReturnStatusEnums.CANALED.getMsg());
+            return resultVO;
         } else if (LoginStatusEnums.LOCK.getCode().equals(user.getStatus())){
             resultVO.setCode(ReturnStatusEnums.FROZEN.getCode());
             resultVO.setMsg(ReturnStatusEnums.FROZEN.getMsg());
+            return resultVO;
         } else if (redisUtil.get(email)==null || redisUtil.get(email).length()==0){
             resultVO.setCode(ReturnStatusEnums.CODE_EXPIRED.getCode());
             resultVO.setMsg(ReturnStatusEnums.CODE_EXPIRED.getMsg());
+            return resultVO;
         }else if (ver.equals(redisUtil.get(email))){
-            String token = jwtToken.createToken(email);
-            if (redisUtil.get(email)==null || redisUtil.get(email).length()==0){
-                redisUtil.set(email,token);
+            String token = jwtToken.createToken(user.getUserId());
+            if (redisUtil.get(user.getUserId())==null || redisUtil.get(user.getUserId()).length()==0){
+                redisUtil.set(user.getUserId(),token);
                 redisUtil.set(token,user.getUserId());
             }
-            redisUtil.expire(email,validity);
+            redisUtil.expire(user.getUserId(),validity);
             redisUtil.expire(token,validity);
             user.setStatus(LoginStatusEnums.LOGIN.getCode());
             userMapper.updateById(user);
             resultVO.setCode(ReturnStatusEnums.LOGIN_SUCCESS.getCode());
             resultVO.setMsg(token);
             resultVO.setData(user);
+            return resultVO;
         }else {
             resultVO.setCode(ReturnStatusEnums.CODE_ERROR.getCode());
             resultVO.setMsg(ReturnStatusEnums.CODE_ERROR.getMsg());
+            return resultVO;
         }
-        return resultVO;
     }
 
     @Override
@@ -250,6 +266,25 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 }
             }
         }
+        return resultVO;
+    }
+
+    @Override
+    public ResultVO exit(String userId) throws Exception {
+        String token = redisUtil.get(userId);
+        if (token!=null){
+            redisUtil.del(userId);
+            redisUtil.del(token);
+        }
+        user.setUserId(userId);
+        user.setStatus(LoginStatusEnums.REGIST.getCode());
+        if (userMapper.updateById(user)==1){
+            resultVO.setCode(ReturnStatusEnums.EXIT_SUCCESS.getCode());
+            resultVO.setMsg(ReturnStatusEnums.EXIT_SUCCESS.getMsg());
+            return resultVO;
+        }
+        resultVO.setCode(ReturnStatusEnums.EXIT_FAIL.getCode());
+        resultVO.setMsg(ReturnStatusEnums.EXIT_FAIL.getMsg());
         return resultVO;
     }
 

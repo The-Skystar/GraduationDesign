@@ -76,4 +76,12 @@ public interface UserService extends IService<User> {
      * @throws Exception
      */
     public ResultVO updPwd(String id,String oldPwd,String newPwd,String email,String ver) throws Exception;
+
+    /**
+     * 退出登录
+     * @param userId
+     * @return
+     * @throws Exception
+     */
+    public ResultVO exit(String userId) throws Exception;
 }

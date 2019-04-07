@@ -74,6 +74,9 @@ public class User extends Model<User> implements Serializable {
                 ", registTime=" + registTime +
                 ", defaultAddress='" + defaultAddress + '\'' +
                 ", permis='" + permis + '\'' +
+                ", id='" + id + '\'' +
+                ", status='" + status + '\'' +
+                ", sex='" + sex + '\'' +
                 '}';
     }
 }

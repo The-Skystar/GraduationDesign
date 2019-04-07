@@ -12,6 +12,7 @@ import com.tss.user_service.vo.ResultVO;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -150,4 +151,8 @@ public class UserController {
         return userService.updPwd(userId,oldPwd,newPwd,email,ver);
     }
 
+    @GetMapping("/exit")
+    public ResultVO exit(String userId) throws  Exception{
+        return userService.exit(userId);
+    }
 }

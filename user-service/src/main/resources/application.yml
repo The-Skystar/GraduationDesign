@@ -47,7 +47,7 @@ spring:
       prefix: /WEB-INF/
       suffix: .jsp
   redis:
-    database: 0
+    database: 5
     host: 127.0.0.1
     port: 6379
     password: 683280
