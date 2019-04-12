@@ -13,6 +13,7 @@ import com.tss.orderService.mapper.OrderMapper;
 import com.tss.orderService.mapper.RecipientMapper;
 import com.tss.orderService.service.OrderService;
 import com.tss.orderService.util.FastJsonUtils;
+import com.tss.orderService.util.IDUtils;
 import com.tss.orderService.vo.OrderVO;
 import com.tss.orderService.vo.ResultVO;
 import org.springframework.beans.BeanUtils;
@@ -49,6 +50,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Orders> implement
         int sender = recipientMapper.insert(orderVO.getSender());
         int receiver = recipientMapper.insert(orderVO.getReceiver());
         int goods = goodsMapper.insert(orderVO.getGoods());
+        orders.setOrderCode(IDUtils.getOrderId());
         orders.setSenderId(orderVO.getSender().getRecId());
         orders.setReceiverId(orderVO.getReceiver().getRecId());
         orders.setGoodsId(orderVO.getGoods().getGoodsId());
@@ -67,4 +69,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Orders> implement
         resultVO.setData(orderVO);
         return resultVO;
     }
+
+
 }

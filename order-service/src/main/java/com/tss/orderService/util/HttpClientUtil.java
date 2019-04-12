@@ -80,7 +80,7 @@ public class HttpClientUtil {
      * @param params 参数map
      * @return 请求结果
      */
-    private static String post(String url, Map<String, String> params) {
+    public static String post(String url, Map<String, String> params) {
         //构造HttpClient的实例
         HttpClient httpClient = new HttpClient();
         //创建POST方法的实例

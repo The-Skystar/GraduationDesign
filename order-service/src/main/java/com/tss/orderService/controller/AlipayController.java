@@ -36,7 +36,7 @@ public class AlipayController {
      *
      * https://docs.open.alipay.com/194/103296
      */
-    @RequestMapping("/notify")
+    @RequestMapping(value = "/notify",method = RequestMethod.POST)
     public String notify(HttpServletRequest request) throws AlipayApiException, UnsupportedEncodingException {
         // 一定要验签，防止黑客篡改参数
         Map<String, String[]> parameterMap = request.getParameterMap();

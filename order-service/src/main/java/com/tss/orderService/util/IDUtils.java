@@ -18,6 +18,12 @@ public class IDUtils {
                 MathUtils.makeUpNewData(NetworkUtils.getPid(), 4);                                 //4位PID进程hash
     }
 
+    public static long getOrderId(){
+        int r1 = (int) (Math.random()*10);
+        int r2 = (int) (Math.random()*10);
+        String random = String.valueOf(r1)+System.currentTimeMillis()+String.valueOf(r2);
+        return Long.parseLong(random);
+    }
     /**
      * 产生普通的唯一无序ID
      *
