@@ -153,6 +153,8 @@ public class IdCardServiceImpl extends ServiceImpl<IdCardMapper, IdCard> impleme
         idCard.setInst(idCardBack.getInst());
         idCard.setUserId(userId);
         if (idCardMapper.insert(idCard)==1){
+            redisUtil.del(userId+"front");
+            redisUtil.del(userId+"back");
             resultVO.setCode(ReturnStatusEnums.AUTHEN_SUCCESS.getCode());
             resultVO.setMsg(ReturnStatusEnums.AUTHEN_SUCCESS.getMsg());
             resultVO.setData(idCard);

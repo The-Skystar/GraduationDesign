@@ -4,8 +4,10 @@ import com.baomidou.mybatisplus.activerecord.Model;
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableId;
 import com.baomidou.mybatisplus.annotations.TableName;
+import com.baomidou.mybatisplus.enums.FieldStrategy;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
+import org.apache.ibatis.type.MappedJdbcTypes;
 import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
@@ -19,7 +21,7 @@ public class User extends Model<User> implements Serializable {
     @TableId("user_id")
     private String userId;
 
-    @TableField("user_nick")
+    @TableField(value = "user_nick")
     private String userNick;
 
     @TableField("realname")
@@ -41,7 +43,7 @@ public class User extends Model<User> implements Serializable {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date registTime;
 
-    @TableField("default_address")
+    @TableField(value = "default_address")
     private String defaultAddress;
 
     @TableField("permis")
@@ -55,6 +57,8 @@ public class User extends Model<User> implements Serializable {
 
     @TableField("sex")
     private String sex;
+
+    private transient String ver;
 
     @Override
     protected Serializable pkVal() {

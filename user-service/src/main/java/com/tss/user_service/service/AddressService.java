@@ -26,6 +26,7 @@ public interface AddressService extends IService<Address> {
      * @return
      * @throws Exception
      */
+    @Transactional
     public ResultVO<List<Address>> delAddress(String addressId,String userId) throws Exception;
 
     /**
@@ -34,6 +35,7 @@ public interface AddressService extends IService<Address> {
      * @return
      * @throws Exception
      */
+    @Transactional
     public ResultVO<List<Address>> updAddress(Address address) throws Exception;
 
     /**

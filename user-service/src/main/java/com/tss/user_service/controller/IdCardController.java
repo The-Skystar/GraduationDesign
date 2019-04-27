@@ -7,10 +7,16 @@ import com.tss.user_service.util.FastJsonUtils;
 import com.tss.user_service.util.RedisUtil;
 import com.tss.user_service.vo.ResultVO;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.web.servlet.MultipartConfigFactory;
+import org.springframework.context.annotation.Bean;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartResolver;
+import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 
+import javax.servlet.MultipartConfigElement;
 import java.net.URLEncoder;
+import java.util.Map;
 
 /**
  * @author ：xiangjun.yang
@@ -39,8 +45,9 @@ public class IdCardController {
      * @return
      * @throws Exception
      */
-    @PostMapping("/authenFront")
-    public ResultVO authenFront(@RequestParam("fcard")MultipartFile file,@RequestParam("realname")String userId) throws Exception{
+    @CrossOrigin
+    @RequestMapping(value = "/authenFront",headers = "Content-Type=multipart/form-data",method = RequestMethod.POST)
+    public ResultVO authenFront(@RequestParam("file")MultipartFile file,@RequestParam("userId")String userId) throws Exception{
         String ak = "vvoaRorsjeDdYZCbDanHsSYp";
         String sk = "adURe3KwH9rzZBELTqvHIWjWaD1jUxzF";
         String path = "E://正.jpg";
@@ -65,7 +72,7 @@ public class IdCardController {
      * @throws Exception
      */
     @PostMapping("/authenBack")
-    public ResultVO authenBack(@RequestParam("bcard")MultipartFile file,@RequestParam("realname")String userId) throws Exception{
+    public ResultVO authenBack(@RequestParam("file")MultipartFile file,@RequestParam("userId")String userId) throws Exception{
         String ak = "vvoaRorsjeDdYZCbDanHsSYp";
         String sk = "adURe3KwH9rzZBELTqvHIWjWaD1jUxzF";
         String path = "E://反.jpg";

@@ -4,10 +4,13 @@ server:
     uri-encoding: UTF-8
     max-threads: 1000
     min-spare-threads: 30
-  port: 8080
+    max-http-post-size: -1
+  port: 8081
   connection-timeout: 5000
 #datasource
 spring:
+  application:
+    name: user-service
   datasource:
     url: jdbc:oracle:thin:@localhost:1521/orcl
     username: tss
@@ -74,6 +77,11 @@ spring:
           starttls:
             enable: true
             required: true
+  servlet:
+    multipart:
+      max-file-size: 100MB # 单个文件大小
+      max-request-size: 100MB # 设置总上传的数据大小
+      enabled: true #开启
 # Mybatis-Plus 配置
 mybatis-plus:
   mapper-locations: classpath:/mapper/*Mapper.xml
@@ -97,11 +105,18 @@ mybatis-plus:
     id-type: 3  #0:数据库ID自增   1:用户输入id  2:全局唯一id(IdWorker)  3:全局唯一ID(uuid)
     db-column-underline: false
     refresh-mapper: true
+    field-strategy: 1
   configuration:
     map-underscore-to-camel-case: true
     cache-enabled: true #配置的缓存的全局开关
     lazyLoadingEnabled: false #延时加载的开关
     multipleResultSetsEnabled: false #开启的话，延时加载一个属性时会加载该对象全部属性，否则按需加载属性
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl #打印sql语句,调试用
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://peer1:1111/eureka/,http://peer2:1112/eureka/
+
+
 
 

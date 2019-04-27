@@ -84,4 +84,14 @@ public interface UserService extends IService<User> {
      * @throws Exception
      */
     public ResultVO exit(String userId) throws Exception;
+
+    /**
+     * 自动登录
+     * @param token
+     * @return
+     * @throws Exception
+     */
+    public ResultVO autoLogin(String token) throws Exception;
+
+    public ResultVO bindEmail(User user) throws Exception;
 }

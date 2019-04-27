@@ -1,5 +1,6 @@
 package com.tss.user_service.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
 import com.tss.user_service.Enum.LoginStatusEnums;
@@ -14,6 +15,10 @@ import com.tss.user_service.util.RedisUtil;
 import com.tss.user_service.util.SendMsgUtil;
 import com.tss.user_service.vo.ResultVO;
 import com.tss.user_service.vo.UserVO;
+import org.apache.commons.beanutils.BeanUtils;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -25,6 +30,8 @@ import java.util.List;
 
 @Service
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
+
+    private static Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
     @Autowired
     private UserMapper userMapper;
@@ -50,22 +57,36 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Autowired
     private JavaMailSender javaMailSender;
 
-    public static final int validity = 60*60;
+    public static final int validity = 8*60*60;
 
     @Override
     public ResultVO regist(User user) throws Exception{
+        if (StringUtils.isBlank(redisUtil.get(user.getEmail()))){
+            resultVO.setCode(ReturnStatusEnums.CODE_EXPIRED.getCode());
+            resultVO.setMsg(ReturnStatusEnums.CODE_EXPIRED.getMsg());
+            return resultVO;
+        }
+        if (!redisUtil.get(user.getEmail()).equals(user.getVer())){
+            resultVO.setCode(ReturnStatusEnums.CODE_ERROR.getCode());
+            resultVO.setMsg(ReturnStatusEnums.CODE_ERROR.getMsg());
+            return resultVO;
+        }
         user.setPwd(encryptUtil.MD5(user.getPwd()));
-        user.setId(encryptUtil.MD5(user.getId()));
+        if (user.getId()!=null)
+            user.setId(encryptUtil.MD5(user.getId()));
         user.setStatus(LoginStatusEnums.REGIST.getCode());
         if (SexEnums.MAN.getValue().equals(user.getSex()) || SexEnums.MAN.getCode().equals(user.getSex()))
             user.setSex(SexEnums.MAN.getCode());
         if (SexEnums.WOMAN.getValue().equals(user.getSex()) || SexEnums.WOMAN.getCode().equals(user.getSex()))
             user.setSex(SexEnums.WOMAN.getCode());
         if (userMapper.insert(user)==1){
+            logger.info(user.getUserNick()+"注册成功");
             resultVO.setCode(ReturnStatusEnums.REGIST_SUCCESS.getCode());
             resultVO.setMsg(ReturnStatusEnums.REGIST_SUCCESS.getMsg());
+            resultVO.setData(user);
             return resultVO;
         }
+        logger.error(user.getUserNick()+"注册失败");
         resultVO.setCode(ReturnStatusEnums.REGIST_FAIL.getCode());
         resultVO.setMsg(ReturnStatusEnums.REGIST_FAIL.getMsg());
         return resultVO;
@@ -77,10 +98,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         wrapper.eq(column,value);
         Integer count = userMapper.selectCount(wrapper);
         if (count > 0){
+            logger.error(column+":"+value+"验证失败");
             resultVO.setCode(ReturnStatusEnums.OCCUPIED.getCode());
             resultVO.setMsg(ReturnStatusEnums.OCCUPIED.getMsg());
             return resultVO;
         }
+        logger.info(column+":"+value+"验证通过");
         resultVO.setCode(ReturnStatusEnums.VALIDATE.getCode());
         resultVO.setMsg(ReturnStatusEnums.VALIDATE.getMsg());
         return resultVO;
@@ -93,8 +116,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         userList.add(userMapper.getUserByEmail(str));
         userList.add(userMapper.getUserByNick(str));
         userList.removeAll(Collections.singleton(null));
-
         if (userList.size()==0){
+            logger.error("该账号不存在");
             resultVO.setCode(ReturnStatusEnums.ACCOUNT_ERROR.getCode());
             resultVO.setMsg(ReturnStatusEnums.ACCOUNT_ERROR.getMsg());
             return resultVO;
@@ -127,6 +150,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                     }
                     redisUtil.expire(user.getUserId(),validity);
                     redisUtil.expire(token,validity);
+                    User cookieUser = new User();
+                    BeanUtils.copyProperties(cookieUser,user);
+                    cookieUser.setPwd(pwd);
+                    redisUtil.set("cookie:"+token,JSONObject.toJSONString(cookieUser));
                     user.setStatus(LoginStatusEnums.LOGIN.getCode());
                     userMapper.updateById(user);
                     resultVO.setCode(ReturnStatusEnums.LOGIN_SUCCESS.getCode());
@@ -209,9 +236,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Override
     public ResultVO updUser(User user) throws Exception {
+//        user.setPwd(encryptUtil.MD5(user.getPwd()));
+        if (user.getId()!=null)
+            user.setId(encryptUtil.MD5(user.getId()));
+        if (SexEnums.MAN.getValue().equals(user.getSex()) || SexEnums.MAN.getCode().equals(user.getSex()))
+            user.setSex(SexEnums.MAN.getCode());
+        if (SexEnums.WOMAN.getValue().equals(user.getSex()) || SexEnums.WOMAN.getCode().equals(user.getSex()))
+            user.setSex(SexEnums.WOMAN.getCode());
         int i = userMapper.updateById(user);
         if (i==1){
-            user = userMapper.selectById(user.getId());
+            user = userMapper.selectById(user.getUserId());
             resultVO.setCode(ReturnStatusEnums.UPD_USER_SUCCESS.getCode());
             resultVO.setMsg(ReturnStatusEnums.UPD_USER_SUCCESS.getMsg());
             resultVO.setData(user);
@@ -225,7 +259,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Override
     public ResultVO updPwd(String id, String oldPwd, String newPwd,String email,String ver) throws Exception {
         User user = userMapper.selectById(id);
-        if (oldPwd!=null){
+        if (oldPwd!=null && oldPwd.length()!=0){
             if (encryptUtil.MD5(oldPwd).equals(user.getPwd())){
                 user.setPwd(encryptUtil.MD5(newPwd));
                 if (userMapper.updateById(user)==1){
@@ -271,6 +305,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Override
     public ResultVO exit(String userId) throws Exception {
+        logger.info("注销登录");
         String token = redisUtil.get(userId);
         if (token!=null){
             redisUtil.del(userId);
@@ -286,6 +321,31 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         resultVO.setCode(ReturnStatusEnums.EXIT_FAIL.getCode());
         resultVO.setMsg(ReturnStatusEnums.EXIT_FAIL.getMsg());
         return resultVO;
+    }
+
+    @Override
+    public ResultVO autoLogin(String token) throws Exception {
+        logger.info("自动登录");
+        JSONObject user = JSONObject.parseObject(redisUtil.get("cookie:"+token));
+        resultVO = this.pwdLogin(user.getString("email"),user.getString("pwd"));
+        if (resultVO.getCode()==100)
+            redisUtil.del("cookie:"+token);
+        return resultVO;
+    }
+
+    @Override
+    public ResultVO bindEmail(User user) throws Exception {
+        if (StringUtils.isBlank(redisUtil.get(user.getEmail()))){
+            resultVO.setCode(ReturnStatusEnums.CODE_EXPIRED.getCode());
+            resultVO.setMsg(ReturnStatusEnums.CODE_EXPIRED.getMsg());
+            return resultVO;
+        }
+        if (!redisUtil.get(user.getEmail()).equals(user.getVer())){
+            resultVO.setCode(ReturnStatusEnums.CODE_ERROR.getCode());
+            resultVO.setMsg(ReturnStatusEnums.CODE_ERROR.getMsg());
+            return resultVO;
+        }
+        return this.updUser(user);
     }
 
 }

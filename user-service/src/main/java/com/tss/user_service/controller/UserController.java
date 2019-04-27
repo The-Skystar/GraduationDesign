@@ -10,17 +10,18 @@ import com.tss.user_service.service.UserService;
 import com.tss.user_service.util.*;
 import com.tss.user_service.vo.ResultVO;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 public class UserController {
+    private static Logger logger = LoggerFactory.getLogger(UserController.class);
+
 
     @Autowired
     private UserService userService;
@@ -51,7 +52,8 @@ public class UserController {
      * @throws Exception
      */
     @PostMapping("/regist")
-    public ResultVO regist(User user) throws Exception{
+    public ResultVO regist(@RequestBody User user) throws Exception{
+        logger.info("注册用户");
         return userService.regist(user);
     }
 
@@ -61,8 +63,8 @@ public class UserController {
      * @param value 要验证的值
      * @return 验证结果 0-已被使用 1-验证通过
      */
-    @PostMapping(value = "/validate/{column}/{value}")
-    public ResultVO validate(@PathVariable String column, @PathVariable String value) throws Exception{
+    @GetMapping("/validate")
+    public ResultVO validate(String column, String value) throws Exception{
         return userService.validate(column,value);
     }
 
@@ -99,8 +101,9 @@ public class UserController {
      * @return
      * @throws Exception
      */
-    @PostMapping("/sendEmail/{email}")
-    public ResultVO sendEmail(@PathVariable String email) throws Exception{
+    @GetMapping("/sendEmail")
+    public ResultVO sendEmail(String email) throws Exception{
+        System.out.println(email);
         if (redisUtil.get(email)!=null)
             redisUtil.del(email);
         String ver = sendMsgUtil.getRandNum();
@@ -131,7 +134,7 @@ public class UserController {
      * @throws Exception
      */
     @PostMapping("/updUser")
-    public ResultVO updUser(User user) throws Exception{
+    public ResultVO updUser(@RequestBody User user) throws Exception{
         return userService.updUser(user);
     }
 
@@ -151,8 +154,36 @@ public class UserController {
         return userService.updPwd(userId,oldPwd,newPwd,email,ver);
     }
 
+    /**
+     * 退出登录
+     * @param userId
+     * @return
+     * @throws Exception
+     */
     @GetMapping("/exit")
     public ResultVO exit(String userId) throws  Exception{
         return userService.exit(userId);
+    }
+
+    /**
+     * 自动登录
+     * @param token
+     * @return
+     * @throws Exception
+     */
+    @PostMapping("/autoLogin")
+    public ResultVO autoLogin(String token) throws Exception{
+        return userService.autoLogin(token);
+    }
+
+    /**
+     * 绑定邮箱，做验证码验证
+     * @param user
+     * @return
+     * @throws Exception
+     */
+    @PostMapping("/bindEmail")
+    public ResultVO bindEmail(User user) throws Exception{
+        return userService.bindEmail(user);
     }
 }

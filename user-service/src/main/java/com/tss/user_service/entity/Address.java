@@ -8,6 +8,7 @@ import lombok.Data;
 import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
+import java.sql.Timestamp;
 import java.util.Date;
 
 /**
@@ -47,10 +48,10 @@ public class Address extends Model<Address> implements Serializable {
     private String phone;
 
     @TableField("create_time")
-    private Date createTime;
+    private Timestamp createTime;
 
     @TableField("update_time")
-    private Date updateTime;
+    private Timestamp updateTime;
 
     @TableField("area")
     private String area;
