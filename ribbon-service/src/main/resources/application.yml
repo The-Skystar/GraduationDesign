@@ -1,0 +1,35 @@
+server:
+  port: 8083
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://peer1:1111/eureka/,http://peer2:1112/eureka/
+spring:
+  application:
+    name: ribbon-service
+  cloud:
+    loadbalancer:
+      retry:
+        enabled: true
+  servlet:
+    multipart:
+      max-file-size: 100MB # 单个文件大小
+      max-request-size: 100MB # 设置总上传的数据大小
+      enabled: true #开启
+ribbon:
+  ReadTimeout: 10000
+  ConnectTimeout: 10000
+hystrix:
+  command:
+    default:
+      execution:
+        isolation:
+          thread:
+            timeoutInMilliseconds: 10000
+user-service:
+  ribbon:
+    ConnectTimeout: 500
+    ReadTimeout: 5000
+    OkToRetryOnAllOperations: true
+    MaxAutoRetriesNextServer: 5
+    MaxAutoRetries: 5
