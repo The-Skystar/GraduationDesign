@@ -35,7 +35,9 @@ public enum ReturnStatusEnums {
     SELECT_SUCCESS(303,"查询到记录"),
 
     ORDER_ONLINE_SUCCESS(400,"电子面单生成成功"),
-    APPOINTMENT_SUCCESS(401,"预约取件成功"),
+    ORDER_ONLINE_FAIL(401,"电子面单生成失败"),
+    APPOINTMENT_SUCCESS(402,"预约取件成功"),
+    APPOINTMENT_FAIL(403,"预约取件失败"),
     ;
     private int code;
 

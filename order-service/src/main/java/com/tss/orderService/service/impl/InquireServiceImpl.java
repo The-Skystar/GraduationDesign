@@ -27,16 +27,20 @@ public class InquireServiceImpl implements InquireService {
     private ResultVO resultVO;
 
     @Override
-    public ResultVO expressInquire(String com, String nu) throws Exception {
+    public ResultVO expressInquire(String com, String nu,String phone) throws Exception {
         String line = "";
         String temp = String.valueOf(Math.random());
         String url = "http://www.kuaidi100.com/query?type=" + com + "&postid=" + nu + "&temp=" + temp + "";
+        if (phone!=null&&phone.length()!=0)
+            url = url + "&phone=" + phone;
+        System.out.println(url);
         try {
             URL realURL = new URL(url);
             HttpURLConnection conn = (HttpURLConnection) realURL.openConnection();
             conn.setRequestProperty("accept", "*/*");
             conn.setRequestProperty("connection", "Keep-Alive");
-            conn.setRequestProperty("user-agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.106 Safari/537.36");
+            conn.setRequestProperty("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.103 Safari/537.36");
+            conn.setRequestProperty("cookie","WWWID=WWW8E3622EEAB9BB7E24737BF98112D7422; Hm_lvt_22ea01af58ba2be0fec7c11b25e88e6c=1555296356,1555404222,1556160672; Hm_lpvt_22ea01af58ba2be0fec7c11b25e88e6c=1556160672; checkCode_071722515161=4657");
             conn.connect();
             int responseCode = conn.getResponseCode();
             if (responseCode == HttpURLConnection.HTTP_OK) {
@@ -44,6 +48,7 @@ public class InquireServiceImpl implements InquireService {
                 BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
                 while ((line = reader.readLine()) != null) {
 //                    return line;
+                    System.out.println(line);
                     resultVO.setCode(999);
                     resultVO.setMsg("查询成功");
                     resultVO.setData(JSONObject.parseObject(line));
@@ -59,7 +64,7 @@ public class InquireServiceImpl implements InquireService {
     }
 
     @Override
-    public ResultVO priceEstimate(String from, String to, String time) throws Exception {
+    public ResultVO priceEstimate(String from, String to,String weight, String time) throws Exception {
         HashMap<String,String> parameters = new HashMap<>();
         parameters.put("startPlace","湖北省-荆州市-荆州区");
         parameters.put("endPlace","上海-上海-浦东新区");

@@ -16,4 +16,21 @@ public interface OrderService extends IService<Orders> {
      */
     @Transactional
     public ResultVO createOrder(JSONObject orderVO) throws Exception;
+
+    /**
+     * Json方式 电子面单
+     * @return
+     * @throws Exception
+     */
+    @Transactional
+    public ResultVO eOrder(JSONObject requestData) throws Exception;
+
+    /**
+     * Json方式 在线预约下单
+     * @param requestData
+     * @return
+     * @throws Exception
+     */
+    @Transactional
+    public ResultVO appointment(JSONObject requestData) throws Exception;
 }

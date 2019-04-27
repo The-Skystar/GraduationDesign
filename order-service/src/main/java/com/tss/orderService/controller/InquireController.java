@@ -35,10 +35,8 @@ public class InquireController {
     private ResultVO resultVO;
 
     @GetMapping("/query")
-    public ResultVO expressInquire(String com,String nu) throws Exception {
-//        resultVO.setCode(1);
-//        resultVO.setData(JSONObject.parseObject(queryData(com, nu)));
-        return inquireService.expressInquire(com,nu);
+    public ResultVO expressInquire(String com,String nu,String phone) throws Exception {
+        return inquireService.expressInquire(com,nu,phone);
     }
 
     @GetMapping("/com")
@@ -48,7 +46,7 @@ public class InquireController {
 
     @GetMapping("/estimate")
     public ResultVO priceEstimate() throws Exception{
-        return inquireService.priceEstimate("","","");
+        return inquireService.priceEstimate("","","","");
     }
 
     public static final String QUERYURL = "http://www.kuaidi100.com/query?";

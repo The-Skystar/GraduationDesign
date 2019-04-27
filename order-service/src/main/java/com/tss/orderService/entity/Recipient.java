@@ -5,6 +5,9 @@ import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableId;
 import com.baomidou.mybatisplus.annotations.TableName;
 import lombok.Data;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
@@ -12,7 +15,7 @@ import java.io.Serializable;
 /**
  * @author ：xiangjun.yang
  * @date ：Created in 2019/4/5 13:15
- * @description：手机人地址信息
+ * @description：收寄人地址信息
  */
 @Data
 @Component
@@ -52,5 +55,21 @@ public class Recipient extends Model<Recipient> implements Serializable {
     @Override
     protected Serializable pkVal() {
         return this.recId;
+    }
+
+    @Override
+    public String toString() {
+        return "Recipient{" +
+                "recId='" + recId + '\'' +
+                ", type='" + type + '\'' +
+                ", name='" + name + '\'' +
+                ", phone='" + phone + '\'' +
+                ", postCode='" + postCode + '\'' +
+                ", province='" + province + '\'' +
+                ", city='" + city + '\'' +
+                ", county='" + county + '\'' +
+                ", street='" + street + '\'' +
+                ", address='" + address + '\'' +
+                '}';
     }
 }

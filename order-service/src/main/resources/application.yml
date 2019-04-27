@@ -4,10 +4,12 @@ server:
     uri-encoding: UTF-8
     max-threads: 1000
     min-spare-threads: 30
-  port: 8081
+  port: 8082
   connection-timeout: 5000
 #datasource
 spring:
+  application:
+    name: order-service
   datasource:
     url: jdbc:oracle:thin:@localhost:1521/orcl
     username: tss
@@ -45,7 +47,7 @@ spring:
       prefix: /WEB-INF/
       suffix: .jsp
   redis:
-    database: 5
+    database: 4
     host: 127.0.0.1
     port: 6379
     password: 683280
@@ -95,12 +97,14 @@ mybatis-plus:
     id-type: 3  #0:数据库ID自增   1:用户输入id  2:全局唯一id(IdWorker)  3:全局唯一ID(uuid)
     db-column-underline: false
     refresh-mapper: true
+    field-strategy: 1
   configuration:
     map-underscore-to-camel-case: true
     cache-enabled: true #配置的缓存的全局开关
     lazyLoadingEnabled: false #延时加载的开关
     multipleResultSetsEnabled: false #开启的话，延时加载一个属性时会加载该对象全部属性，否则按需加载属性
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl #打印sql语句,调试用
+#    jdbc-type-for-null: 'null' #注意：单引号
 # 沙箱账号
 pay:
   alipay:
@@ -112,7 +116,10 @@ pay:
     alipayPublicKey: MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA05nItMloIT+CWIm1r1PsO4xprOHKFRQaQjBYlmkqJMyINbA2CqXKCFVwNpoRf1o6fWONED4lKorJaSZ5aMQlNTpRJCgOKrZcjiQs0zSUVb43FE077d/tIdYiIykvqsEgbS9Oh8gdihO0N1abCe9e/I4LpWa0pNqxDoiXqea2z2CDcNQjIIeXz4/9Qkbrx4n9yQfddONU6vGAo87+NAEHQ9B02N2Q2dIzw78N7rt0COfsoT7dFJRNPqAE5/xxpOTJ0HgrB7DG2yJhB8YMng3sgOdv9OSwDh+sl6Tb48ZIlix7SiuiO+Bq16PDJtFG9dkFfyzF2jG0GX8iycMaeEOwFwIDAQAB
     returnUrl: https://www.baidu.com/
 #    notifyUrl: http://s9v2cw.natappfree.cc/alipay/notify
-
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://peer1:1111/eureka/,http://peer2:1112/eureka/
 
 
 

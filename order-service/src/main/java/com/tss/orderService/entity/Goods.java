@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.activerecord.Model;
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.annotations.TableId;
 import com.baomidou.mybatisplus.annotations.TableName;
+import com.baomidou.mybatisplus.enums.FieldStrategy;
 import lombok.Data;
 import org.springframework.stereotype.Component;
 
@@ -22,23 +23,23 @@ public class Goods extends Model<Goods> implements Serializable {
     @TableId("goods_id")
     private String goodsId;
 
-    @TableField("goods_type")
+    @TableField(value = "goods_type")
     private String goodsType;
 
-    @TableField("numb")
+    @TableField(value = "numb")
     private int numb;
 
-    @TableField("weight")
-    private float weight;
+    @TableField(value = "weight")
+    private double weight;
 
-    @TableField("goodsvol")
-    private float goodsVol;
+    @TableField(value = "goodsvol")
+    private double goodsVol;
 
-    @TableField("goodsdesp")
+    @TableField(value = "GOODSDESC")
     private String goodsDesp;
 
     @Override
     protected Serializable pkVal() {
-        return null;
+        return this.goodsId;
     }
 }

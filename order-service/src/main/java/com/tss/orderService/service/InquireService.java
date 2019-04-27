@@ -11,7 +11,7 @@ public interface InquireService {
      * @return
      * @throws Exception
      */
-    public ResultVO expressInquire(String com,String nu) throws Exception;
+    public ResultVO expressInquire(String com,String nu,String phone) throws Exception;
 
     /**
      * 时效价格查询
@@ -21,7 +21,7 @@ public interface InquireService {
      * @return
      * @throws Exception
      */
-    public ResultVO priceEstimate(String from,String to,String time) throws Exception;
+    public ResultVO priceEstimate(String from,String to,String weight,String time) throws Exception;
 
     /**
      * 智能识别快递公司

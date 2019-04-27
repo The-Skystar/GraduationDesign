@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
+import java.util.Date;
 
 /**
  * @author ：xiangjun.yang
@@ -48,16 +49,16 @@ public class Orders extends Model<Orders> implements Serializable {
     private String payId;
 
     @TableField("cost")
-    private float cost;
+    private double cost;
 
     @TableField("isnotice")
     private String isNotice;
 
     @TableField("start_time")
-    private Timestamp startTime;
+    private Date startTime;
 
     @TableField("end_time")
-    private Timestamp endTime;
+    private Date endTime;
 
     @TableField("remark")
     private String remark;

@@ -6,4 +6,6 @@ import org.apache.ibatis.annotations.Mapper;
 
 @Mapper
 public interface GoodsMapper extends BaseMapper<Goods> {
+
+    public Integer add(Goods goods) throws Exception;
 }

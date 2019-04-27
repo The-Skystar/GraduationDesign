@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
+import java.util.Date;
 
 /**
  * @author ：xiangjun.yang
@@ -28,13 +29,13 @@ public class OrderVO implements Serializable {
 
     private String payId;
 
-    private float cost;
+    private double cost;
 
     private String isNotice;
 
-    private Timestamp startTime;
+    private Date startTime;
 
-    private Timestamp endTime;
+    private Date endTime;
 
     private String remark;
 

@@ -80,7 +80,7 @@ public class AlipayWAPPayController {
         model.setProductCode(productCode);
 
         AlipayTradeWapPayRequest wapPayRequest =new AlipayTradeWapPayRequest();
-        wapPayRequest.setReturnUrl("http://127.0.0.1:8081/alipay/wap/returnUrl");
+        wapPayRequest.setReturnUrl("http://127.0.0.1:8082/alipay/wap/returnUrl");
         wapPayRequest.setNotifyUrl(alipayProperties.getNotifyUrl());
         wapPayRequest.setBizModel(model);
 

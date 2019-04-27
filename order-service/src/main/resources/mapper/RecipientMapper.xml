@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tss.orderService.mapper.RecipientMapper">
+
+    <insert id="addSend" parameterType="com.tss.orderService.entity.Recipient">
+        insert into tss.tb_recipient(name, phone, province, city, county, address,postcode)
+        values(#{send.name},#{send.phone},#{send.province},#{send.city},#{send.county},#{send.address},#{send.postCode})
+    </insert>
+
+</mapper>
