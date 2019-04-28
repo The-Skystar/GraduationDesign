@@ -45,8 +45,8 @@ public class InquireController {
     }
 
     @GetMapping("/estimate")
-    public ResultVO priceEstimate() throws Exception{
-        return inquireService.priceEstimate("","","","");
+    public ResultVO priceEstimate(String from ,String to ,String weight ,String time) throws Exception{
+        return inquireService.priceEstimate(from,to,weight,time);
     }
 
     public static final String QUERYURL = "http://www.kuaidi100.com/query?";

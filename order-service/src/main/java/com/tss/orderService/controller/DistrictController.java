@@ -30,4 +30,8 @@ public class DistrictController {
         return districtService.getCity(parent);
     }
 
+    @GetMapping("/postcode")
+    public ResultVO getPostcode(String districtCode) throws Exception{
+        return districtService.getPostcode(districtCode);
+    }
 }

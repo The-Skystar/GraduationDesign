@@ -25,7 +25,7 @@ public class Orders extends Model<Orders> implements Serializable {
     private String orderId;
 
     @TableField("order_code")
-    private long orderCode;
+    private String orderCode;
 
     @TableField("user_id")
     private String userId;

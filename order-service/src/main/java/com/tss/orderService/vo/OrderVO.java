@@ -27,6 +27,8 @@ public class OrderVO implements Serializable {
 
     private Timestamp orderTime;
 
+    private String orderCode;
+
     private String payId;
 
     private double cost;

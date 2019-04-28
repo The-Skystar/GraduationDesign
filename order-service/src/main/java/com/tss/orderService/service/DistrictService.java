@@ -24,4 +24,11 @@ public interface DistrictService extends IService<District> {
      */
     public ResultVO<List<District>> getCity(String parent) throws Exception;
 
+    /**
+     * 获取邮政编码
+     * @param districtCode
+     * @return
+     * @throws Exception
+     */
+    public ResultVO getPostcode(String districtCode) throws Exception;
 }

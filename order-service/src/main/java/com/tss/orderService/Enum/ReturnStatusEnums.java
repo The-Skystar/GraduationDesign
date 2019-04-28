@@ -38,6 +38,8 @@ public enum ReturnStatusEnums {
     ORDER_ONLINE_FAIL(401,"电子面单生成失败"),
     APPOINTMENT_SUCCESS(402,"预约取件成功"),
     APPOINTMENT_FAIL(403,"预约取件失败"),
+
+    ORDER_SUCCERR(999,"创建订单成功"),
     ;
     private int code;
 

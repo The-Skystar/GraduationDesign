@@ -13,6 +13,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -30,25 +31,43 @@ public class InquireServiceImpl implements InquireService {
     public ResultVO expressInquire(String com, String nu,String phone) throws Exception {
         String line = "";
         String temp = String.valueOf(Math.random());
-        String url = "http://www.kuaidi100.com/query?type=" + com + "&postid=" + nu + "&temp=" + temp + "";
-        if (phone!=null&&phone.length()!=0)
-            url = url + "&phone=" + phone;
-        System.out.println(url);
+        Map<String,String> parameters = new HashMap<>();
+        parameters.put("type",com);
+        parameters.put("postid",nu);
+        parameters.put("temp",temp);
+        parameters.put("phone",phone);
+        parameters.put("platform","MWWW");
+        parameters.put("id","1");
+        String url = "http://m.kuaidi100.com/query" ;
+//                "?type=" + com + "&postid=" + nu + "&temp=" + temp;
+//        if (phone!=null&&phone.length()!=0)
+//            url = url + "&phone=" + phone;
         try {
             URL realURL = new URL(url);
             HttpURLConnection conn = (HttpURLConnection) realURL.openConnection();
             conn.setRequestProperty("accept", "*/*");
-            conn.setRequestProperty("connection", "Keep-Alive");
-            conn.setRequestProperty("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.103 Safari/537.36");
-            conn.setRequestProperty("cookie","WWWID=WWW8E3622EEAB9BB7E24737BF98112D7422; Hm_lvt_22ea01af58ba2be0fec7c11b25e88e6c=1555296356,1555404222,1556160672; Hm_lpvt_22ea01af58ba2be0fec7c11b25e88e6c=1556160672; checkCode_071722515161=4657");
-            conn.connect();
+            conn.setRequestProperty("connection", "keep-alive");
+            conn.setRequestProperty("user-agent", "Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A372 Safari/604.1");
+            conn.setRequestProperty("X-Requested-With","XMLHttpRequest");
+            conn.setRequestProperty("Content-Type","application/x-www-form-urlencoded");
+//            conn.connect();
+            String requestContent = "";
+            Set<String> keys = parameters.keySet();
+            for(String key : keys){
+                requestContent = requestContent + key + "=" + parameters.get(key) + "&";
+            }
+            requestContent = requestContent.substring(0, requestContent.lastIndexOf("&"));
+            conn.setDoOutput(true);
+            DataOutputStream ds = new DataOutputStream(conn.getOutputStream());
+            //使用write(requestContent.getBytes())是为了防止中文出现乱码
+            ds.write(requestContent.getBytes());
+            ds.flush();
             int responseCode = conn.getResponseCode();
             if (responseCode == HttpURLConnection.HTTP_OK) {
                 InputStream inputStream = conn.getInputStream();
                 BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
                 while ((line = reader.readLine()) != null) {
 //                    return line;
-                    System.out.println(line);
                     resultVO.setCode(999);
                     resultVO.setMsg("查询成功");
                     resultVO.setData(JSONObject.parseObject(line));
@@ -66,10 +85,10 @@ public class InquireServiceImpl implements InquireService {
     @Override
     public ResultVO priceEstimate(String from, String to,String weight, String time) throws Exception {
         HashMap<String,String> parameters = new HashMap<>();
-        parameters.put("startPlace","湖北省-荆州市-荆州区");
-        parameters.put("endPlace","上海-上海-浦东新区");
-        parameters.put("weight","10");
-        parameters.put("startTime","2019-4-9 14:08");
+        parameters.put("startPlace",from);
+        parameters.put("endPlace",to);
+        parameters.put("weight",weight);
+        parameters.put("startTime",time);
 //        parameters.put("longitude","112.21737");
 //        parameters.put("latitude","30.33354");
         parameters.put("token","guYsCE6pw-5n4LO9V0tc5L3hQ4gAnhcpKkRE4AOMUGw");

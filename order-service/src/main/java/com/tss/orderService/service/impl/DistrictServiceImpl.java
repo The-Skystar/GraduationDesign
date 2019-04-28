@@ -27,7 +27,7 @@ public class DistrictServiceImpl extends ServiceImpl<DistrictMapper, District> i
     private DistrictMapper districtMapper;
 
     @Autowired
-    private ResultVO<List<District>> resultVO;
+    private ResultVO resultVO;
 
     @Override
     public ResultVO<List<District>> getProvince() throws Exception {
@@ -52,5 +52,18 @@ public class DistrictServiceImpl extends ServiceImpl<DistrictMapper, District> i
         resultVO.setData(districtList);
         return resultVO;
     }
+
+    @Override
+    public ResultVO getPostcode(String districtCode) throws Exception {
+        EntityWrapper<District> wrapper = new EntityWrapper<>();
+        wrapper.eq("city_id",districtCode);
+        List<District> list = districtMapper.selectList(wrapper);
+        resultVO.setCode(600);
+        resultVO.setMsg("获取邮编");
+        if (!list.isEmpty())
+            resultVO.setData(list.get(0).getZipcode());
+        return resultVO;
+    }
+
 
 }
