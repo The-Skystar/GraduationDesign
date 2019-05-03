@@ -63,6 +63,15 @@ public class Orders extends Model<Orders> implements Serializable {
     @TableField("remark")
     private String remark;
 
+    @TableField("receive_time")
+    private Timestamp receiveTime;
+
+    @TableField("take_time")
+    private Timestamp takeTime;
+
+    @TableField("send_time")
+    private Timestamp sendTime;
+
     @Override
     protected Serializable pkVal() {
         return this.orderId;

@@ -2,8 +2,10 @@ package com.tss.orderService.vo;
 
 import com.tss.orderService.entity.Goods;
 import com.tss.orderService.entity.Orders;
+import com.tss.orderService.entity.Pay;
 import com.tss.orderService.entity.Recipient;
 import lombok.Data;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
@@ -30,6 +32,8 @@ public class OrderVO implements Serializable {
     private String orderCode;
 
     private String payId;
+
+    private Pay pay;
 
     private double cost;
 

@@ -10,10 +10,12 @@ import com.tss.orderService.Enum.inter.ErrorCode;
 import com.tss.orderService.config.DateConverterConfig;
 import com.tss.orderService.entity.Goods;
 import com.tss.orderService.entity.Orders;
+import com.tss.orderService.entity.Pay;
 import com.tss.orderService.entity.Recipient;
 import com.tss.orderService.exception.MyException;
 import com.tss.orderService.mapper.GoodsMapper;
 import com.tss.orderService.mapper.OrderMapper;
+import com.tss.orderService.mapper.PayMapper;
 import com.tss.orderService.mapper.RecipientMapper;
 import com.tss.orderService.service.OrderService;
 import com.tss.orderService.util.FastJsonUtils;
@@ -28,9 +30,8 @@ import org.springframework.stereotype.Service;
 
 import java.beans.PropertyDescriptor;
 import java.sql.Timestamp;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * @author ：xiangjun.yang
@@ -55,7 +56,13 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Orders> implement
     private OrderMapper orderMapper;
 
     @Autowired
+    private PayMapper payMapper;
+
+    @Autowired
     private KdUtil kdUtil;
+
+    @Autowired
+    private OrderVO orderVo;
 
     //电商ID
     private String EBusinessID = "1437550";
@@ -95,18 +102,10 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Orders> implement
         if (senderNum != 1 || receiverNum != 1 || goodsNum != 1 || order != 1) {
             throw new MyException(ErrorEnums.SYS_ERROR);
         }
-        EntityWrapper<Orders> wrapper = new EntityWrapper<>();
-        wrapper.eq("order_code",orders.getOrderCode());
-        List<Orders> list = orderMapper.selectList(wrapper);
-        if (list!=null)
-            orders = list.get(0);
-        BeanUtils.copyProperties(orderVO,orders);
+        BeanUtils.copyProperties(orders,orderVO);
         orderVO.setSender(sender);
         orderVO.setReceiver(receiver);
         orderVO.setGoods(goods);
-
-        System.err.println(list);
-
         resultVO.setCode(ReturnStatusEnums.ORDER_SUCCERR.getCode());
         resultVO.setMsg(ReturnStatusEnums.ORDER_SUCCERR.getMsg());
         resultVO.setData(orderVO);
@@ -156,6 +155,216 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Orders> implement
         return resultVO;
     }
 
+    @Override
+    public ResultVO orderDetail(String orderCode) throws Exception {
+        Recipient sender = null;
+        Recipient receiver = null;
+        Goods goods = null;
+        List<Orders> ordersList = orderMapper.selectList(new EntityWrapper<Orders>().eq("order_code",orderCode));
+        if (ordersList!=null)
+            orders = ordersList.get(0);
+        if (orders.getSenderId()!=null)
+            sender = recipientMapper.selectById(orders.getSenderId());
+        if (orders.getReceiverId()!=null)
+            receiver = recipientMapper.selectById(orders.getReceiverId());
+        if (orders.getGoodsId()!=null)
+            goods = goodsMapper.selectById(orders.getGoodsId());
+        BeanUtils.copyProperties(orders,orderVo);
+        orderVo.setSender(sender);
+        orderVo.setReceiver(receiver);
+        orderVo.setGoods(goods);
+        System.err.println(ordersList);
+        resultVO.setCode(ReturnStatusEnums.ORDER_SUCCERR.getCode());
+        resultVO.setMsg(ReturnStatusEnums.ORDER_SUCCERR.getMsg());
+        resultVO.setData(orderVo);
+        return resultVO;
+    }
+
+    @Override
+    public ResultVO getOrder(String status) throws Exception {
+        Recipient sender = null;
+        Recipient receiver = null;
+        Goods goods = null;
+        Pay pay = null;
+        List<Orders> ordersList = orderMapper.selectList(new EntityWrapper<Orders>().eq("status",status).orderBy("start_time"));
+        List<OrderVO> orderVOList = new ArrayList<>();
+        if (ordersList!=null){
+            for (int i = 0;i<ordersList.size();i++){
+                OrderVO orderVO = new OrderVO();
+                Orders order = ordersList.get(i);
+                if (order.getSenderId()!=null)
+                    sender = recipientMapper.selectById(order.getSenderId());
+                if (order.getReceiverId()!=null)
+                    receiver = recipientMapper.selectById(order.getReceiverId());
+                if (order.getGoodsId()!=null)
+                    goods = goodsMapper.selectById(order.getGoodsId());
+                if (order.getPayId()!=null)
+                    pay = payMapper.selectById(order.getPayId());
+                orderVO.setOrderId(order.getOrderId());
+                orderVO.setUserId(order.getUserId());
+                orderVO.setStatus(order.getStatus());
+                orderVO.setOrderTime(order.getOrderTime());
+                orderVO.setOrderCode(order.getOrderCode());
+                orderVO.setPay(pay);
+                orderVO.setCost(order.getCost());
+                orderVO.setIsNotice(order.getIsNotice());
+                orderVO.setStartTime(order.getStartTime());
+                orderVO.setEndTime(order.getEndTime());
+                orderVO.setRemark(order.getRemark());
+                orderVO.setSender(sender);
+                orderVO.setReceiver(receiver);
+                orderVO.setGoods(goods);
+                orderVOList.add(orderVO);
+            }
+        }
+        resultVO.setCode(ReturnStatusEnums.SELECT_SUCCESS.getCode());
+        resultVO.setMsg(ReturnStatusEnums.SELECT_SUCCESS.getMsg());
+        resultVO.setData(orderVOList);
+        return resultVO;
+    }
+
+    @Override
+    public ResultVO getOrderCount(String status) throws Exception {
+        int count = orderMapper.selectCount(new EntityWrapper<Orders>().eq("status",status));
+        resultVO.setCode(190);
+        resultVO.setMsg("查询记录数");
+        resultVO.setData(count);
+        return resultVO;
+    }
+
+    @Override
+    public ResultVO serachByTime(String time,String status) throws Exception {
+        Recipient sender = null;
+        Recipient receiver = null;
+        Goods goods = null;
+        Pay pay = null;
+        List<Orders> ordersList = orderMapper.searchByTime(time,status);
+        List<OrderVO> orderVOList = new ArrayList<>();
+        if (ordersList!=null){
+            for (Orders order:ordersList){
+                OrderVO orderVO = new OrderVO();
+                if (order.getSenderId()!=null)
+                    sender = recipientMapper.selectById(order.getSenderId());
+                if (order.getReceiverId()!=null)
+                    receiver = recipientMapper.selectById(order.getReceiverId());
+                if (order.getGoodsId()!=null)
+                    goods = goodsMapper.selectById(order.getGoodsId());
+                if (order.getPayId()!=null)
+                    pay = payMapper.selectById(order.getPayId());
+                orderVO.setOrderId(order.getOrderId());
+                orderVO.setUserId(order.getUserId());
+                orderVO.setStatus(order.getStatus());
+                orderVO.setOrderTime(order.getOrderTime());
+                orderVO.setOrderCode(order.getOrderCode());
+                orderVO.setPay(pay);
+                orderVO.setCost(order.getCost());
+                orderVO.setIsNotice(order.getIsNotice());
+                orderVO.setStartTime(order.getStartTime());
+                orderVO.setEndTime(order.getEndTime());
+                orderVO.setRemark(order.getRemark());
+                orderVO.setSender(sender);
+                orderVO.setReceiver(receiver);
+                orderVO.setGoods(goods);
+                orderVOList.add(orderVO);
+            }
+        }
+        resultVO.setCode(ReturnStatusEnums.SELECT_SUCCESS.getCode());
+        resultVO.setMsg(ReturnStatusEnums.SELECT_SUCCESS.getMsg());
+        resultVO.setData(orderVOList);
+        return resultVO;
+    }
+
+    @Override
+    public ResultVO serachAllColumn(String status, String conditions) throws Exception {
+        List<OrderVO> list = (List<OrderVO>) this.getOrder(status).getData();
+        List<OrderVO> resultList = list.stream()
+                .filter(orderVO -> orderVO.getOrderCode().contains(conditions)
+                        ||conditions.equals(orderVO.getSender().getName())
+                        ||conditions.equals(orderVO.getSender().getPhone())
+                        ||(orderVO.getSender().getProvince()+orderVO.getSender().getCity()+orderVO.getSender().getCounty()+orderVO.getSender().getStreet()+orderVO.getSender().getAddress()).contains(conditions)
+                ).collect(Collectors.toList());
+        resultVO.setCode(ReturnStatusEnums.SELECT_SUCCESS.getCode());
+        resultVO.setMsg(ReturnStatusEnums.SELECT_SUCCESS.getMsg());
+        resultVO.setData(resultList);
+        return resultVO;
+    }
+
+    @Override
+    public ResultVO receiveOrder(String orderId) throws Exception {
+        orders = orderMapper.selectById(orderId);
+        Timestamp now = new Timestamp(System.currentTimeMillis());
+        if (new Date().before(orders.getStartTime())){
+            orders.setReceiveTime(now);
+            orders.setStatus(OrderStatus.RECEIVE.getCode());
+            if (orderMapper.updateById(orders)==1){
+                resultVO.setCode(ReturnStatusEnums.ORDER_RECEIVED.getCode());
+                resultVO.setMsg(ReturnStatusEnums.ORDER_RECEIVED.getMsg());
+                resultVO.setData(orders);
+                return resultVO;
+            }else {
+                resultVO.setCode(ReturnStatusEnums.ORDER_RECEIVED_FAIL.getCode());
+                resultVO.setMsg(ReturnStatusEnums.ORDER_RECEIVED_FAIL.getMsg());
+                resultVO.setData(null);
+                return resultVO;
+            }
+        }else {
+            resultVO.setCode(ReturnStatusEnums.ORDER_EXPIRED.getCode());
+            resultVO.setMsg(ReturnStatusEnums.ORDER_EXPIRED.getMsg());
+            resultVO.setData(null);
+            return resultVO;
+        }
+    }
+
+    @Override
+    public ResultVO batchReceiveOrder(String[] orderIds) throws Exception {
+        for (String orderId:orderIds){
+            if (this.receiveOrder(orderId).getCode()!=408){
+                throw new MyException(ErrorEnums.SYS_ERROR);
+            }
+        }
+        resultVO.setCode(ReturnStatusEnums.ORDER_RECEIVED.getCode());
+        resultVO.setMsg(ReturnStatusEnums.ORDER_RECEIVED.getMsg());
+        resultVO.setData(null);
+        return resultVO;
+    }
+
+    @Override
+    public ResultVO serach(String status, String time, String conditions) throws Exception {
+        List<OrderVO> list = (List<OrderVO>)this.serachByTime(time,status).getData();
+        List<OrderVO> resultList = list.stream()
+                .filter(orderVO -> orderVO.getOrderCode().contains(conditions)
+                        ||conditions.equals(orderVO.getSender().getName())
+                        ||conditions.equals(orderVO.getSender().getPhone())
+                        ||(orderVO.getSender().getProvince()+orderVO.getSender().getCity()+orderVO.getSender().getCounty()+orderVO.getSender().getStreet()+orderVO.getSender().getAddress()).contains(conditions)
+                ).collect(Collectors.toList());
+        resultVO.setCode(ReturnStatusEnums.SELECT_SUCCESS.getCode());
+        resultVO.setMsg(ReturnStatusEnums.SELECT_SUCCESS.getMsg());
+        resultVO.setData(resultList);
+        return resultVO;
+    }
+
+    @Override
+    public ResultVO takeOrder(String orderId,double cost,double weight) throws Exception {
+        orders.setOrderId(orderId);
+        orders.setCost(cost);
+        orders.setStatus(OrderStatus.TAKE.getCode());
+        orders.setTakeTime(new Timestamp(System.currentTimeMillis()));
+        int i = orderMapper.updateById(orders);
+        orders = orderMapper.selectById(orderId);
+        Goods goods = new Goods();
+        goods.setGoodsId(orders.getGoodsId());
+        goods.setWeight(weight);
+        int j = goodsMapper.updateById(goods);
+        if (i==1&&j==1){
+            resultVO.setCode(ReturnStatusEnums.ORDER_TAKED.getCode());
+            resultVO.setMsg(ReturnStatusEnums.ORDER_TAKED.getMsg());
+            resultVO.setData(null);
+            return resultVO;
+        }else {
+            throw new MyException(ErrorEnums.SYS_ERROR);
+        }
+    }
+
     private void nullConverNullString(Object obj) throws Exception {
         PropertyUtilsBean propertyUtilsBean = new PropertyUtilsBean();
         PropertyDescriptor[] descriptors = propertyUtilsBean.getPropertyDescriptors(obj);
@@ -168,5 +377,6 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Orders> implement
             }
         }
     }
+
 
 }

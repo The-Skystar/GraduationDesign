@@ -38,6 +38,10 @@ public enum ReturnStatusEnums {
     ORDER_ONLINE_FAIL(401,"电子面单生成失败"),
     APPOINTMENT_SUCCESS(402,"预约取件成功"),
     APPOINTMENT_FAIL(403,"预约取件失败"),
+    ORDER_EXPIRED(407,"订单过期，不能接单"),
+    ORDER_RECEIVED(408,"已接单"),
+    ORDER_RECEIVED_FAIL(409,"接单失败"),
+    ORDER_TAKED(410,"取件"),
 
     ORDER_SUCCERR(999,"创建订单成功"),
     ;

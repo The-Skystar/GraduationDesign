@@ -15,7 +15,7 @@ public interface OrderService extends IService<Orders> {
      * @throws Exception
      */
     @Transactional
-    public ResultVO createOrder(JSONObject orderVO) throws Exception;
+    ResultVO createOrder(JSONObject orderVO) throws Exception;
 
     /**
      * Json方式 电子面单
@@ -23,7 +23,7 @@ public interface OrderService extends IService<Orders> {
      * @throws Exception
      */
     @Transactional
-    public ResultVO eOrder(JSONObject requestData) throws Exception;
+    ResultVO eOrder(JSONObject requestData) throws Exception;
 
     /**
      * Json方式 在线预约下单
@@ -32,5 +32,25 @@ public interface OrderService extends IService<Orders> {
      * @throws Exception
      */
     @Transactional
-    public ResultVO appointment(JSONObject requestData) throws Exception;
+    ResultVO appointment(JSONObject requestData) throws Exception;
+
+    ResultVO orderDetail(String orderCode) throws Exception;
+
+    ResultVO getOrder(String status) throws Exception;
+
+    ResultVO getOrderCount(String status) throws Exception;
+
+    ResultVO serachByTime(String time,String status) throws Exception;
+
+    ResultVO serachAllColumn(String status,String conditions) throws Exception;
+
+    ResultVO receiveOrder(String orderId) throws Exception;
+
+    @Transactional
+    ResultVO batchReceiveOrder(String[] orderIds) throws Exception;
+
+    ResultVO serach(String status,String time,String conditions) throws Exception;
+
+    @Transactional
+    ResultVO takeOrder(String orderId,double cost,double weight) throws Exception;
 }

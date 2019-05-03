@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tss.orderService.mapper.OrderMapper">
+
+    <select id="searchByTime" resultType="com.tss.orderService.entity.Orders">
+        SELECT order_id AS orderId,order_code AS orderCode,user_id AS userId,sender AS senderId,receiver AS receiverId,goods_id AS goodsId,status,order_time AS orderTime,pay_id AS payId,cost,isnotice AS isNotice,start_time AS startTime,end_time AS endTime,remark FROM tss.tb_order t
+        where to_char(t.order_time,'yyyy-mm-dd') = #{time} and t.status = #{status}
+    </select>
+
+    <select id="searchAllColumn" resultType="com.tss.orderService.entity.Orders">
+        SELECT order_id AS orderId,order_code AS orderCode,user_id AS userId,sender AS senderId,receiver AS receiverId,goods_id AS goodsId,status,order_time AS orderTime,pay_id AS payId,cost,isnotice AS isNotice,start_time AS startTime,end_time AS endTime,remark FROM tss.tb_order t
+        where 1 = 1
+    </select>
+</mapper>

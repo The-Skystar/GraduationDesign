@@ -2,9 +2,12 @@ package com.tss.orderService.Enum;
 
 public enum OrderStatus {
     DROP_ORDER("1","已下单"),
-    PAY("2","已支付"),
-    TRANSPORT("3","运送中"),
-    RECEIPT("4","已收货"),
+    RECEIVE("2","已接单"),
+    TAKE("3","已取件"),
+    PAY("4","已支付"),
+    TRANSPORT("5","运送中"),
+    RECEIPT("6","已收货"),
+    DIFFICULT("7","疑难件"),
     ABANNDONED("15","废弃")
     ;
     private String code;
