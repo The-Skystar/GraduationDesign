@@ -51,4 +51,10 @@ public class AddressController {
     public ResultVO selectById(String addressId) throws Exception{
         return addressService.selectById(addressId);
     }
+
+    @GetMapping("/geocoder")
+    @ApiOperation(value = "逆地址编码")
+    public ResultVO geocoder(String longitude,String latitude) throws Exception{
+        return addressService.geocoder(longitude,latitude);
+    }
 }

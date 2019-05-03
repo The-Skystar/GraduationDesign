@@ -53,6 +53,14 @@ public class AddressService {
         return restTemplate.getForObject("http://user-service/selectById?addressId={1}",ResultVO.class,addressId);
     }
 
+    @HystrixCommand(fallbackMethod = "getFallback")
+    public ResultVO geocoder(String longitude,String latitude) throws Exception{
+        Map params = new HashMap();
+        params.put("longitude",longitude);
+        params.put("latitude",latitude);
+        return restTemplate.getForObject("http://user-service/geocoder?longitude={longitude}&latitude={latitude}",ResultVO.class,params);
+    }
+
     public ResultVO getFallback(String addressId){
         resultVO.setCode(500);
         resultVO.setMsg("系统错误");
@@ -73,4 +81,5 @@ public class AddressService {
         resultVO.setData(null);
         return resultVO;
     }
+
 }

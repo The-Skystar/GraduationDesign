@@ -39,7 +39,7 @@ public class InquireService {
         params.put("to",to);
         params.put("weight",weight);
         params.put("time",time);
-        return restTemplate.getForObject("http://order-service/estimate?from={from}&to={to}&weight={weight}&time={time}",ResultVO.class,params);
+        return restTemplate.getForEntity("http://order-service/estimate?from={from}&to={to}&weight={weight}&time={time}",ResultVO.class,params).getBody();
     }
 
     @HystrixCommand(fallbackMethod = "getFallback")

@@ -32,4 +32,44 @@ public class OrderController {
     public ResultVO eOrder(@RequestBody JSONObject requestData) throws Exception{
         return orderService.eOrder(requestData);
     }
+
+    @GetMapping("/getOrder")
+    public ResultVO getNotReceive(String status) throws Exception{
+        return orderService.getNotReceive(status);
+    }
+
+    @GetMapping("/searchByTime")
+    public ResultVO searchByTime(String time,String status) throws Exception{
+        return orderService.searchByTime(time,status);
+    }
+
+    @GetMapping("/serachAllColumn")
+    public ResultVO serachAllColumn(String status, String conditions) throws Exception{
+        return orderService.serachAllColumn(status,conditions);
+    }
+
+    @GetMapping("/receiveOrder")
+    public ResultVO receiveOrder(String orderId) throws Exception{
+        return orderService.receiveOrder(orderId);
+    }
+
+    @GetMapping("/count")
+    public ResultVO getOrderCount(String status) throws Exception{
+        return orderService.getOrderCount(status);
+    }
+
+    @GetMapping("/search")
+    public ResultVO serach(String status, String time, String conditions) throws Exception{
+        return orderService.serach(status,time,conditions);
+    }
+
+    @GetMapping("/batchReceive")
+    public ResultVO batchReceiveOrder(String orderId) throws Exception{
+        return orderService.batchReceiveOrder(orderId);
+    }
+
+    @GetMapping("/take")
+    public ResultVO takeOrder(String orderId,double cost,double weight) throws Exception{
+        return orderService.takeOrder(orderId,cost,weight);
+    }
 }

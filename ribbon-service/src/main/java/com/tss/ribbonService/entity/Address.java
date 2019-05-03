@@ -39,6 +39,8 @@ public class Address implements Serializable {
 
     private transient String isDefault;
 
+    private String postcode;
+
     @Override
     public String toString() {
         return "Address{" +
