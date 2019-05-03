@@ -1,5 +1,10 @@
 package com.tss.user_service.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
+import com.baidubce.BceClientConfiguration;
+import com.baidubce.auth.DefaultBceCredentials;
+import com.baidubce.services.dumap.DuMapClient;
+import com.baidubce.services.dumap.model.ReverseGeocoderParam;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
 import com.tss.user_service.Enum.ReturnStatusEnums;
@@ -39,6 +44,12 @@ public class AddressServiceImpl extends ServiceImpl<AddressMapper, Address> impl
 
     @Autowired
     private ResultVO resultVO;
+
+    private static final String ACCESS_KEY_ID = "33f93943865a4daea36359397f8bcd63";             // 请替换为您的Access Key ID
+    private static final String SECRET_ACCESS_KEY = "858fb53675314c5eb1ced1ec1a75f493";     // 请替换为您的Secret Access Key
+    private static final String APP_ID = "0ea746ec-9ffd-459a-aab8-59b25d1a54e4";                           // 请替换为您的App Id
+
+
     @Override
     public ResultVO<List<Address>> createAddress(Address address) throws Exception {
         logger.info("创建一条地址信息，如果是默认地址则修改tb_user表");
@@ -117,5 +128,41 @@ public class AddressServiceImpl extends ServiceImpl<AddressMapper, Address> impl
         resultVO.setData(addressMapper.selectById(addressId));
         logger.info("查询指定地址信息");
         return resultVO;
+    }
+
+    @Override
+    public ResultVO geocoder(String longitude, String latitude) throws Exception {
+        resultVO.setCode(600);
+        resultVO.setMsg("逆地址编码");
+        resultVO.setData(JSONObject.parseObject(this.createDuMapClientAndQuery(latitude,longitude)));
+        return resultVO;
+    }
+
+
+
+    private DuMapClient client;
+
+    private void createDuMapClient() {
+        BceClientConfiguration config = new BceClientConfiguration()
+                .withCredentials(new DefaultBceCredentials(ACCESS_KEY_ID, SECRET_ACCESS_KEY));
+
+        client = new DuMapClient(config);
+    }
+
+    private String callDuMapService(String latitude,String longitude) {
+        ReverseGeocoderParam params = ReverseGeocoderParam.builder()
+                .location(latitude+","+longitude)
+                .coordtype("bd09ll")
+                .retCoordtype("bd09ll")
+                .pois(0)
+                .radius(1000)
+                .output("json")
+                .build();
+        return client.reverseGeocoder(APP_ID, params);
+    }
+
+    public String createDuMapClientAndQuery(String latitude,String longitude) {
+        createDuMapClient();
+        return callDuMapService(latitude,longitude);
     }
 }

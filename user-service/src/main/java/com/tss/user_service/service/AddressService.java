@@ -53,4 +53,13 @@ public interface AddressService extends IService<Address> {
      * @throws Exception
      */
     public ResultVO<Address> selectByAddressId(String addressId) throws Exception;
+
+    /**
+     * 全国逆地址编码
+     * @param longitude
+     * @param latitude
+     * @return
+     * @throws Exception
+     */
+    public ResultVO geocoder(String longitude,String latitude) throws Exception;
 }

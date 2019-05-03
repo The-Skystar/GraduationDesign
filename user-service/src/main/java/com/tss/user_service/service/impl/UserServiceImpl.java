@@ -115,6 +115,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         userList.add(userMapper.getUserByPhone(str));
         userList.add(userMapper.getUserByEmail(str));
         userList.add(userMapper.getUserByNick(str));
+        userList.add(userMapper.selectById(str));
         userList.removeAll(Collections.singleton(null));
         if (userList.size()==0){
             logger.error("该账号不存在");

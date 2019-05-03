@@ -56,6 +56,9 @@ public class Address extends Model<Address> implements Serializable {
     @TableField("area")
     private String area;
 
+    @TableField("postcode")
+    private String postcode;
+
     private transient String isDefault;
 
     @Override

@@ -10,11 +10,10 @@ import com.tss.user_service.entity.User;
 import com.tss.user_service.mapper.IdCardMapper;
 import com.tss.user_service.mapper.UserMapper;
 import com.tss.user_service.service.IdCardService;
-import com.tss.user_service.util.FastJsonUtils;
-import com.tss.user_service.util.HttpClientUtil;
-import com.tss.user_service.util.IdcardUtils;
-import com.tss.user_service.util.RedisUtil;
+import com.tss.user_service.util.*;
+import com.tss.user_service.vo.IdCardVO;
 import com.tss.user_service.vo.ResultVO;
+import org.apache.commons.beanutils.BeanUtils;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -38,6 +37,9 @@ public class IdCardServiceImpl extends ServiceImpl<IdCardMapper, IdCard> impleme
     private IdCard idCard;
 
     @Autowired
+    private IdCardVO idCardVO;
+
+    @Autowired
     private DateConverterConfig dateConverter;
 
     @Autowired
@@ -51,6 +53,9 @@ public class IdCardServiceImpl extends ServiceImpl<IdCardMapper, IdCard> impleme
 
     @Autowired
     private UserMapper userMapper;
+
+    @Autowired
+    private EncryptUtil encryptUtil;
 
     @Override
     public String getAuth(String ak, String sk) throws Exception{
@@ -142,6 +147,7 @@ public class IdCardServiceImpl extends ServiceImpl<IdCardMapper, IdCard> impleme
             resultVO.setData(null);
             return resultVO;
         }
+        idCard.setCerId(IDUtils.getUUID());
         idCard.setName(idCardFront.getName());
         idCard.setSex(idCardFront.getSex());
         idCard.setFamous(idCardFront.getFamous());
@@ -157,7 +163,8 @@ public class IdCardServiceImpl extends ServiceImpl<IdCardMapper, IdCard> impleme
             redisUtil.del(userId+"back");
             resultVO.setCode(ReturnStatusEnums.AUTHEN_SUCCESS.getCode());
             resultVO.setMsg(ReturnStatusEnums.AUTHEN_SUCCESS.getMsg());
-            resultVO.setData(idCard);
+            BeanUtils.copyProperties(idCardVO,idCard);
+            resultVO.setData(idCardVO);
             return resultVO;
         }else {
             resultVO.setCode(ReturnStatusEnums.SYS_ERROR.getCode());

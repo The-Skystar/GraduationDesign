@@ -66,4 +66,9 @@ public class AddressController {
     public ResultVO selectById(String addressId) throws Exception{
         return addressService.selectByAddressId(addressId);
     }
+
+    @GetMapping("/geocoder")
+    public ResultVO geocoder(String longitude,String latitude) throws Exception{
+        return addressService.geocoder(longitude,latitude);
+    }
 }
