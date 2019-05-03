@@ -48,13 +48,18 @@ public class MyFilter extends ZuulFilter {
         RequestContext ctx = RequestContext.getCurrentContext();
         HttpServletRequest request = ctx.getRequest();
         logger.info("send {} request to {}",request.getMethod(),request.getRequestURL().toString());
-        urlList.add("http://127.0.0.1:8088/tss/pwdLogin");
-        urlList.add("http://127.0.0.1:8088/tss/exit");
-        urlList.add("http://127.0.0.1:8088/tss/sendEmail");
-        urlList.add("http://127.0.0.1:8088/tss/reg");
-        urlList.add("http://127.0.0.1:8088/tss/validate");
-        urlList.add("http://127.0.0.1:8088/tss/autoLogin");
-        urlList.add("http://127.0.0.1:8088/tss/emailLogin");
+        urlList.add("http://10.156.85.170:8088/tss/pwdLogin");
+        urlList.add("http://10.156.85.170:8088/tss/exit");
+        urlList.add("http://10.156.85.170:8088/tss/sendEmail");
+        urlList.add("http://10.156.85.170:8088/tss/reg");
+        urlList.add("http://10.156.85.170:8088/tss/validate");
+        urlList.add("http://10.156.85.170:8088/tss/autoLogin");
+        urlList.add("http://10.156.85.170:8088/tss/emailLogin");
+        urlList.add("http://10.156.85.170:8088/tss/geocoder");
+        urlList.add("http://10.156.85.170:8088/tss/query");
+        urlList.add("http://10.156.85.170:8088/tss/estimate");
+        urlList.add("http://10.156.85.170:8088/tss/com");
+        urlList.add("http://10.156.85.170:8088/tss/postcode");
         if (urlList.contains(request.getRequestURL().toString())){
             logger.info("不需要验证，放行");
             return true;
