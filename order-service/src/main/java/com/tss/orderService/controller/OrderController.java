@@ -12,7 +12,6 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import javax.ws.rs.GET;
 import java.io.IOException;
 
 /**
@@ -77,7 +76,7 @@ public class OrderController {
 
     @GetMapping("/search")
     public ResultVO serach(String status, String time, String conditions) throws Exception{
-        return orderService.serach(status,time,conditions);
+        return orderService.search(status,time,conditions);
     }
 
     @GetMapping("/test")
@@ -95,5 +94,40 @@ public class OrderController {
     @GetMapping("/take")
     public ResultVO takeOrder(String orderId,double cost,double weight) throws Exception{
         return orderService.takeOrder(orderId,cost,weight);
+    }
+
+    @GetMapping("/searchAll")
+    public ResultVO searchAll(String time, String conditions, String status) throws Exception{
+        return orderService.searchAll(time,conditions,status);
+    }
+
+    @GetMapping("/costTotal")
+    public ResultVO costTotal(String time) throws Exception{
+        return orderService.costTotal(time);
+    }
+
+    @GetMapping("/costTotalBet")
+    public ResultVO costTotal(String startTime, String endTime) throws Exception{
+        return orderService.costTotal(startTime,endTime);
+    }
+
+    @GetMapping("/notice")
+    public ResultVO noticePay(String orderId) throws Exception{
+        return orderService.noticePay(orderId);
+    }
+
+    @GetMapping("/sendOrder")
+    public ResultVO sendOrder(String phone) throws Exception{
+        return orderService.sendOrder(phone);
+    }
+
+    @GetMapping("/recOrder")
+    public ResultVO recOrder(String phone) throws Exception{
+        return orderService.recOrder(phone);
+    }
+
+    @GetMapping("/comOrder")
+    public ResultVO completedOrder(String phone) throws Exception{
+        return orderService.completedOrder(phone);
     }
 }

@@ -33,7 +33,6 @@ public enum ReturnStatusEnums {
     DEL_ADDRESS_SUCCESS(301,"删除地址成功"),
     UPD_ADDRESS_SUCCESS(302,"修改地址成功"),
     SELECT_SUCCESS(303,"查询到记录"),
-
     ORDER_ONLINE_SUCCESS(400,"电子面单生成成功"),
     ORDER_ONLINE_FAIL(401,"电子面单生成失败"),
     APPOINTMENT_SUCCESS(402,"预约取件成功"),

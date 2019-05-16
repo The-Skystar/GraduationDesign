@@ -49,8 +49,22 @@ public interface OrderService extends IService<Orders> {
     @Transactional
     ResultVO batchReceiveOrder(String[] orderIds) throws Exception;
 
-    ResultVO serach(String status,String time,String conditions) throws Exception;
+    ResultVO search(String status, String time, String conditions) throws Exception;
 
     @Transactional
     ResultVO takeOrder(String orderId,double cost,double weight) throws Exception;
+
+    ResultVO searchAll(String time, String conditions, String status) throws Exception;
+
+    ResultVO costTotal(String time) throws Exception;
+
+    ResultVO costTotal(String startTime,String endTime) throws Exception;
+
+    ResultVO noticePay(String...orderIds) throws Exception;
+
+    ResultVO sendOrder(String phone) throws Exception;
+
+    ResultVO recOrder(String phone) throws Exception;
+
+    ResultVO completedOrder(String phone) throws Exception;
 }

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
@@ -7,10 +7,8 @@
 <body style="font-size: 30px">
 
 <form method="post" action="/alipay/wap/alipage">
-    <h3>购买商品：越南新娘</h3>
-    <h3>价格：20000</h3>
-    <h3>数量：2个</h3>
-
+    <h3 th:text="${session.subject}"></h3>
+    <h3 th:text="${session.cost}"></h3>
     <button style="width: 100%; height: 60px; alignment: center; background: blue" type="submit">支付</button>
 </form>
 

@@ -1,5 +1,6 @@
 package com.tss.orderService.controller;
 
+import com.alibaba.fastjson.JSONObject;
 import com.alipay.api.AlipayApiException;
 import com.alipay.api.AlipayClient;
 import com.alipay.api.domain.AlipayTradeCloseModel;
@@ -16,8 +17,11 @@ import com.alipay.api.response.AlipayTradeFastpayRefundQueryResponse;
 import com.alipay.api.response.AlipayTradeRefundResponse;
 import com.tss.orderService.config.DateConverterConfig;
 import com.tss.orderService.entity.AlipayProperties;
+import com.tss.orderService.entity.Orders;
 import com.tss.orderService.entity.Pay;
+import com.tss.orderService.mapper.OrderMapper;
 import com.tss.orderService.service.PayService;
+import com.tss.orderService.util.RedisUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -59,6 +63,26 @@ public class AlipayWAPPayController {
 
     @Autowired
     private PayService payService;
+
+    @Autowired
+    private WebSocket webSocket;
+
+    @Autowired
+    private RedisUtil redisUtil;
+
+    @Autowired
+    private OrderMapper orderMapper;
+
+    @GetMapping("/toPayPage")
+    public String toPayPage(HttpServletRequest request,HttpServletResponse response){
+        String userId = request.getParameter("userId");
+        String cost = request.getParameter("cost");
+        String subject = request.getParameter("subject");
+        request.getSession().setAttribute("userId",userId);
+        request.getSession().setAttribute("cost",cost);
+        request.getSession().setAttribute("subject",subject);
+        return "toPay";
+    }
     /**
      * 去支付
      *
@@ -67,14 +91,16 @@ public class AlipayWAPPayController {
      * @param response
      * @throws Exception
      */
-    @PostMapping("/alipage")
-    public void gotoPayPage(HttpServletResponse response) throws AlipayApiException, IOException {
+    @GetMapping("/alipage")
+    public void gotoPayPage(HttpServletRequest request,HttpServletResponse response) throws Exception {
         // 订单模型
         String productCode="QUICK_WAP_WAY";
         AlipayTradeWapPayModel model = new AlipayTradeWapPayModel();
-        model.setOutTradeNo(UUID.randomUUID().toString());
-        model.setSubject("支付测试");
-        model.setTotalAmount("0.01");
+        String outTradeNo = UUID.randomUUID().toString();
+        model.setOutTradeNo(outTradeNo);
+        redisUtil.set(outTradeNo,request.getParameter("orderId"));
+        model.setSubject(request.getParameter("subject"));
+        model.setTotalAmount(request.getParameter("cost"));
         model.setBody("支付测试，共0.01元");
         model.setTimeoutExpress("2m");
         model.setProductCode(productCode);
@@ -102,7 +128,7 @@ public class AlipayWAPPayController {
      * @throws AlipayApiException
      */
     @RequestMapping("/returnUrl")
-    public String returnUrl(HttpServletRequest request, HttpServletResponse response) throws UnsupportedEncodingException, AlipayApiException {
+    public String returnUrl(HttpServletRequest request, HttpServletResponse response) throws UnsupportedEncodingException, AlipayApiException,Exception {
         response.setContentType("text/html;charset=" + alipayProperties.getCharset());
 
         //获取支付宝GET过来反馈信息
@@ -131,6 +157,12 @@ public class AlipayWAPPayController {
             pay.setPayTime(dateConverterConfig.convert(request.getParameter("timestamp")));
             pay.setWay("支付宝");
             payService.insert(pay);
+            Orders orders = new Orders();
+            orders.setOrderId(redisUtil.get(request.getParameter("out_trade_no")));
+            orders.setPayId(pay.getPayId());
+            orderMapper.updateById(orders);
+            webSocket.sendOneMessage("888", JSONObject.toJSONString(orders));
+
             //商户订单号
             String out_trade_no = new String(request.getParameter("out_trade_no").getBytes("ISO-8859-1"),"UTF-8");
             //支付宝交易号

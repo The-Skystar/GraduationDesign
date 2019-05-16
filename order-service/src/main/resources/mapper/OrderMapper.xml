@@ -11,4 +11,26 @@
         SELECT order_id AS orderId,order_code AS orderCode,user_id AS userId,sender AS senderId,receiver AS receiverId,goods_id AS goodsId,status,order_time AS orderTime,pay_id AS payId,cost,isnotice AS isNotice,start_time AS startTime,end_time AS endTime,remark FROM tss.tb_order t
         where 1 = 1
     </select>
+    <select id="searchAllByTime" resultType="com.tss.orderService.entity.Orders">
+        SELECT order_id AS orderId,order_code AS orderCode,user_id AS userId,sender AS senderId,receiver AS receiverId,goods_id AS goodsId,status,order_time AS orderTime,pay_id AS payId,cost,isnotice AS isNotice,start_time AS startTime,end_time AS endTime,remark FROM tss.tb_order t
+        where to_char(t.order_time,'yyyy-mm-dd') = #{time}
+    </select>
+    <select id="costTotal" resultType="java.lang.Double">
+        SELECT sum(cost) FROM tss.tb_order t
+        where to_char(t.order_time,'yyyy-mm-dd') = #{time}
+    </select>
+    <select id="collection" resultType="java.lang.Double">
+        select coalesce(sum(cost),0) as costTotal from tss.tb_order a left join tss.tb_pay b on a.pay_id = b.pay_id
+        where to_char(b.pay_time,'yyyy-mm-dd') = #{time}
+    </select>
+    <select id="costTotalBet" resultType="com.tss.orderService.vo.PayVO">
+        SELECT to_char(t.order_time,'yyyy-mm-dd') as time,coalesce(sum(cost),0) as costTotal FROM tss.tb_order t
+        where to_char(t.order_time,'yyyy-mm-dd') between #{startTime} and #{endTime}
+        group by to_char(t.order_time,'yyyy-mm-dd')
+    </select>
+    <select id="collectionBet" resultType="com.tss.orderService.vo.PayVO">
+        select to_char(b.pay_time,'yyyy-mm-dd') as time,coalesce(sum(cost),0) as costTotal from tss.tb_order a left join tss.tb_pay b on a.pay_id = b.pay_id
+        where to_char(b.pay_time,'yyyy-mm-dd') between #{startTime} and #{endTime}
+        group by to_char(b.pay_time,'yyyy-mm-dd')
+    </select>
 </mapper>

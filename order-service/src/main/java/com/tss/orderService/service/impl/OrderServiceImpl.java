@@ -8,6 +8,7 @@ import com.tss.orderService.Enum.OrderStatus;
 import com.tss.orderService.Enum.ReturnStatusEnums;
 import com.tss.orderService.Enum.inter.ErrorCode;
 import com.tss.orderService.config.DateConverterConfig;
+import com.tss.orderService.controller.WebSocket;
 import com.tss.orderService.entity.Goods;
 import com.tss.orderService.entity.Orders;
 import com.tss.orderService.entity.Pay;
@@ -22,10 +23,14 @@ import com.tss.orderService.util.FastJsonUtils;
 import com.tss.orderService.util.IDUtils;
 import com.tss.orderService.util.KdUtil;
 import com.tss.orderService.vo.OrderVO;
+import com.tss.orderService.vo.PayVO;
 import com.tss.orderService.vo.ResultVO;
+import org.apache.catalina.User;
 import org.apache.commons.beanutils.PropertyUtilsBean;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 import java.beans.PropertyDescriptor;
@@ -64,6 +69,15 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Orders> implement
     @Autowired
     private OrderVO orderVo;
 
+    @Autowired
+    private PayVO payVO;
+
+    @Autowired
+    private WebSocket webSocket;
+
+    @Autowired
+    private JavaMailSender javaMailSender;
+
     //电商ID
     private String EBusinessID = "1437550";
     //电商加密私钥，快递鸟提供，注意保管，不要泄漏
@@ -86,6 +100,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Orders> implement
         int senderNum = recipientMapper.insert(sender);
         int receiverNum = recipientMapper.insert(receiver);
         int goodsNum = goodsMapper.insert(goods);
+        orders.setOrderId(IDUtils.getUUID());
         orders.setOrderCode(String.valueOf(orderVO.getOrderCode()));
         orders.setSenderId(orderVO.getSender().getRecId());
         orders.setReceiverId(orderVO.getReceiver().getRecId());
@@ -106,6 +121,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Orders> implement
         orderVO.setSender(sender);
         orderVO.setReceiver(receiver);
         orderVO.setGoods(goods);
+        webSocket.sendOneMessage("888",JSONObject.toJSONString(orderVO));
         resultVO.setCode(ReturnStatusEnums.ORDER_SUCCERR.getCode());
         resultVO.setMsg(ReturnStatusEnums.ORDER_SUCCERR.getMsg());
         resultVO.setData(orderVO);
@@ -186,7 +202,12 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Orders> implement
         Recipient receiver = null;
         Goods goods = null;
         Pay pay = null;
-        List<Orders> ordersList = orderMapper.selectList(new EntityWrapper<Orders>().eq("status",status).orderBy("start_time"));
+        List<Orders> ordersList = null;
+        if (status!=null&&status.length()!=0) {
+             ordersList = orderMapper.selectList(new EntityWrapper<Orders>().eq("status",status).orderBy("start_time"));
+        }else {
+            ordersList = orderMapper.selectList(new EntityWrapper<Orders>().orderBy("order_time",false));
+        }
         List<OrderVO> orderVOList = new ArrayList<>();
         if (ordersList!=null){
             for (int i = 0;i<ordersList.size();i++){
@@ -297,6 +318,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Orders> implement
             orders.setReceiveTime(now);
             orders.setStatus(OrderStatus.RECEIVE.getCode());
             if (orderMapper.updateById(orders)==1){
+                webSocket.sendOneMessage(orders.getUserId(),JSONObject.toJSONString(orders));
+                this.sendEmial("1054632915@qq.com","yxj201503316@163.com","取件通知","您有快递已接单，等待取件");
                 resultVO.setCode(ReturnStatusEnums.ORDER_RECEIVED.getCode());
                 resultVO.setMsg(ReturnStatusEnums.ORDER_RECEIVED.getMsg());
                 resultVO.setData(orders);
@@ -329,7 +352,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Orders> implement
     }
 
     @Override
-    public ResultVO serach(String status, String time, String conditions) throws Exception {
+    public ResultVO search(String status, String time, String conditions) throws Exception {
         List<OrderVO> list = (List<OrderVO>)this.serachByTime(time,status).getData();
         List<OrderVO> resultList = list.stream()
                 .filter(orderVO -> orderVO.getOrderCode().contains(conditions)
@@ -356,6 +379,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Orders> implement
         goods.setWeight(weight);
         int j = goodsMapper.updateById(goods);
         if (i==1&&j==1){
+            this.noticePay(orders.getOrderId());
             resultVO.setCode(ReturnStatusEnums.ORDER_TAKED.getCode());
             resultVO.setMsg(ReturnStatusEnums.ORDER_TAKED.getMsg());
             resultVO.setData(null);
@@ -363,6 +387,263 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Orders> implement
         }else {
             throw new MyException(ErrorEnums.SYS_ERROR);
         }
+    }
+
+    @Override
+    public ResultVO searchAll(String time, String conditions, String status) throws Exception {
+        List<OrderVO> list = new ArrayList<>();
+        if (!(time!=null && time.length()!=0))
+            list = (List<OrderVO>)this.getOrder(status).getData();
+        if ((time!=null && time.length()!=0)&&(status!=null&&status.length()!=0))
+            list = (List<OrderVO>)this.serachByTime(time,status).getData();
+        if (time!=null && time.length()!=0&&!(status!=null&&status.length()!=0))
+            list = this.searchAllByTime(time);
+        List<OrderVO> resultList = list.stream()
+                .filter(orderVO -> orderVO.getOrderCode().contains(conditions)
+                        ||conditions.equals(orderVO.getSender().getName())
+                        ||conditions.equals(orderVO.getSender().getPhone())
+                        ||(orderVO.getSender().getProvince()+orderVO.getSender().getCity()+orderVO.getSender().getCounty()+orderVO.getSender().getStreet()+orderVO.getSender().getAddress()).contains(conditions)
+                ).collect(Collectors.toList());
+        resultVO.setCode(ReturnStatusEnums.SELECT_SUCCESS.getCode());
+        resultVO.setMsg(ReturnStatusEnums.SELECT_SUCCESS.getMsg());
+        resultVO.setData(resultList);
+        return resultVO;
+    }
+
+    @Override
+    public ResultVO costTotal(String time) throws Exception {
+        double total = orderMapper.costTotal(time);
+        double collection = orderMapper.collection(time);
+        payVO.setTime(time);
+        payVO.setCostTotal(total);
+        payVO.setCollection(collection);
+        payVO.setRefund(0);
+        List<PayVO> list = new ArrayList<>();
+        list.add(payVO);
+        resultVO.setCode(ReturnStatusEnums.SELECT_SUCCESS.getCode());
+        resultVO.setMsg(ReturnStatusEnums.SELECT_SUCCESS.getMsg());
+        resultVO.setData(list);
+        return resultVO;
+    }
+
+    @Override
+    public ResultVO costTotal(String startTime, String endTime) throws Exception {
+        List<PayVO> list = orderMapper.costTotalBet(startTime,endTime);
+        List<PayVO> list1 = orderMapper.collectionBet(startTime,endTime);
+        for (PayVO payVO : list){
+            for (PayVO payVO1 : list1){
+                if (payVO.getTime().equals(payVO1.getTime())){
+                    payVO.setCollection(payVO1.getCollection());
+                    list1.remove(payVO1);
+                }
+            }
+        }
+        for (PayVO payVO1 : list1){
+            PayVO payVO = new PayVO();
+            payVO.setTime(payVO1.getTime());
+            payVO.setCollection(payVO1.getCollection());
+            list.add(payVO);
+        }
+        resultVO.setCode(ReturnStatusEnums.SELECT_SUCCESS.getCode());
+        resultVO.setMsg(ReturnStatusEnums.SELECT_SUCCESS.getMsg());
+        resultVO.setData(list);
+        return resultVO;
+    }
+
+    @Override
+    public ResultVO noticePay(String... orderIds) throws Exception {
+        for (String orderId:orderIds){
+            orders = orderMapper.selectById(orderId);
+            webSocket.sendOneMessage(orders.getUserId(),JSONObject.toJSONString(orders));
+            this.sendEmial("1054632915@qq.com","yxj201503316@163.com","付款通知","您有"+orders.getCost()+"元消费待付款");
+        }
+        resultVO.setCode(999);
+        resultVO.setMsg("通知成功");
+        resultVO.setData(null);
+        return resultVO;
+    }
+
+    @Override
+    public ResultVO sendOrder(String phone) throws Exception {
+        String[] status = {"1","2","3","4","5"};
+        List<Orders> ordersList = orderMapper.selectList(new EntityWrapper<Orders>().in("status",status));
+        Recipient sender = null;
+        Recipient receiver = null;
+        Goods goods = null;
+        Pay pay = null;
+        List<OrderVO> orderVOList = new ArrayList<>();
+        if (ordersList!=null){
+            for (Orders order:ordersList){
+                OrderVO orderVO = new OrderVO();
+                if (order.getSenderId()!=null)
+                    sender = recipientMapper.selectById(order.getSenderId());
+                if (order.getReceiverId()!=null)
+                    receiver = recipientMapper.selectById(order.getReceiverId());
+                if (order.getGoodsId()!=null)
+                    goods = goodsMapper.selectById(order.getGoodsId());
+                if (order.getPayId()!=null)
+                    pay = payMapper.selectById(order.getPayId());
+                orderVO.setOrderId(order.getOrderId());
+                orderVO.setUserId(order.getUserId());
+                orderVO.setStatus(order.getStatus());
+                orderVO.setOrderTime(order.getOrderTime());
+                orderVO.setOrderCode(order.getOrderCode());
+                orderVO.setPay(pay);
+                orderVO.setCost(order.getCost());
+                orderVO.setIsNotice(order.getIsNotice());
+                orderVO.setStartTime(order.getStartTime());
+                orderVO.setEndTime(order.getEndTime());
+                orderVO.setRemark(order.getRemark());
+                orderVO.setSender(sender);
+                orderVO.setReceiver(receiver);
+                orderVO.setGoods(goods);
+                orderVOList.add(orderVO);
+            }
+        }
+        List<OrderVO> resultList = orderVOList.stream().filter(orderVO -> phone.equals(orderVO.getSender().getPhone())).collect(Collectors.toList());
+        resultVO.setCode(ReturnStatusEnums.SELECT_SUCCESS.getCode());
+        resultVO.setMsg(ReturnStatusEnums.SELECT_SUCCESS.getMsg());
+        resultVO.setData(resultList);
+        return resultVO;
+    }
+
+    @Override
+    public ResultVO recOrder(String phone) throws Exception {
+        String[] status = {"1","2","3","4","5"};
+        List<Orders> ordersList = orderMapper.selectList(new EntityWrapper<Orders>().in("status",status));
+        Recipient sender = null;
+        Recipient receiver = null;
+        Goods goods = null;
+        Pay pay = null;
+        List<OrderVO> orderVOList = new ArrayList<>();
+        if (ordersList!=null){
+            for (Orders order:ordersList){
+                OrderVO orderVO = new OrderVO();
+                if (order.getSenderId()!=null)
+                    sender = recipientMapper.selectById(order.getSenderId());
+                if (order.getReceiverId()!=null)
+                    receiver = recipientMapper.selectById(order.getReceiverId());
+                if (order.getGoodsId()!=null)
+                    goods = goodsMapper.selectById(order.getGoodsId());
+                if (order.getPayId()!=null)
+                    pay = payMapper.selectById(order.getPayId());
+                orderVO.setOrderId(order.getOrderId());
+                orderVO.setUserId(order.getUserId());
+                orderVO.setStatus(order.getStatus());
+                orderVO.setOrderTime(order.getOrderTime());
+                orderVO.setOrderCode(order.getOrderCode());
+                orderVO.setPay(pay);
+                orderVO.setCost(order.getCost());
+                orderVO.setIsNotice(order.getIsNotice());
+                orderVO.setStartTime(order.getStartTime());
+                orderVO.setEndTime(order.getEndTime());
+                orderVO.setRemark(order.getRemark());
+                orderVO.setSender(sender);
+                orderVO.setReceiver(receiver);
+                orderVO.setGoods(goods);
+                orderVOList.add(orderVO);
+            }
+        }
+        List<OrderVO> resultList = orderVOList.stream().filter(orderVO -> phone.equals(orderVO.getReceiver().getPhone())).collect(Collectors.toList());
+        resultVO.setCode(ReturnStatusEnums.SELECT_SUCCESS.getCode());
+        resultVO.setMsg(ReturnStatusEnums.SELECT_SUCCESS.getMsg());
+        resultVO.setData(resultList);
+        return resultVO;
+    }
+
+    @Override
+    public ResultVO completedOrder(String phone) throws Exception {
+        List<Orders> ordersList = orderMapper.selectList(new EntityWrapper<Orders>().eq("status","6"));
+        Recipient sender = null;
+        Recipient receiver = null;
+        Goods goods = null;
+        Pay pay = null;
+        List<OrderVO> orderVOList = new ArrayList<>();
+        if (ordersList!=null){
+            for (Orders order:ordersList){
+                OrderVO orderVO = new OrderVO();
+                if (order.getSenderId()!=null)
+                    sender = recipientMapper.selectById(order.getSenderId());
+                if (order.getReceiverId()!=null)
+                    receiver = recipientMapper.selectById(order.getReceiverId());
+                if (order.getGoodsId()!=null)
+                    goods = goodsMapper.selectById(order.getGoodsId());
+                if (order.getPayId()!=null)
+                    pay = payMapper.selectById(order.getPayId());
+                orderVO.setOrderId(order.getOrderId());
+                orderVO.setUserId(order.getUserId());
+                orderVO.setStatus(order.getStatus());
+                orderVO.setOrderTime(order.getOrderTime());
+                orderVO.setOrderCode(order.getOrderCode());
+                orderVO.setPay(pay);
+                orderVO.setCost(order.getCost());
+                orderVO.setIsNotice(order.getIsNotice());
+                orderVO.setStartTime(order.getStartTime());
+                orderVO.setEndTime(order.getEndTime());
+                orderVO.setRemark(order.getRemark());
+                orderVO.setSender(sender);
+                orderVO.setReceiver(receiver);
+                orderVO.setGoods(goods);
+                orderVOList.add(orderVO);
+            }
+        }
+        List<OrderVO> resultList = orderVOList.stream()
+                .filter(orderVO -> phone.equals(orderVO.getSender().getPhone())
+                ||phone.equals(orderVO.getReceiver().getPhone())).collect(Collectors.toList());
+        resultVO.setCode(ReturnStatusEnums.SELECT_SUCCESS.getCode());
+        resultVO.setMsg(ReturnStatusEnums.SELECT_SUCCESS.getMsg());
+        resultVO.setData(resultList);
+        return resultVO;
+    }
+
+    public ResultVO sendEmial(String from, String to, String title, String content) throws Exception {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(from);
+        message.setTo(to);
+        message.setSubject(title);
+        message.setText(content);
+        javaMailSender.send(message);
+        resultVO.setCode(ReturnStatusEnums.SEND_CODE.getCode());
+        resultVO.setMsg(ReturnStatusEnums.SEND_CODE.getMsg());
+        return resultVO;
+    }
+
+    public List<OrderVO> searchAllByTime(String time) throws Exception{
+        Recipient sender = null;
+        Recipient receiver = null;
+        Goods goods = null;
+        Pay pay = null;
+        List<Orders> ordersList = orderMapper.searchAllByTime(time);
+        List<OrderVO> orderVOList = new ArrayList<>();
+        if (ordersList!=null){
+            for (Orders order:ordersList){
+                OrderVO orderVO = new OrderVO();
+                if (order.getSenderId()!=null)
+                    sender = recipientMapper.selectById(order.getSenderId());
+                if (order.getReceiverId()!=null)
+                    receiver = recipientMapper.selectById(order.getReceiverId());
+                if (order.getGoodsId()!=null)
+                    goods = goodsMapper.selectById(order.getGoodsId());
+                if (order.getPayId()!=null)
+                    pay = payMapper.selectById(order.getPayId());
+                orderVO.setOrderId(order.getOrderId());
+                orderVO.setUserId(order.getUserId());
+                orderVO.setStatus(order.getStatus());
+                orderVO.setOrderTime(order.getOrderTime());
+                orderVO.setOrderCode(order.getOrderCode());
+                orderVO.setPay(pay);
+                orderVO.setCost(order.getCost());
+                orderVO.setIsNotice(order.getIsNotice());
+                orderVO.setStartTime(order.getStartTime());
+                orderVO.setEndTime(order.getEndTime());
+                orderVO.setRemark(order.getRemark());
+                orderVO.setSender(sender);
+                orderVO.setReceiver(receiver);
+                orderVO.setGoods(goods);
+                orderVOList.add(orderVO);
+            }
+        }
+        return orderVOList;
     }
 
     private void nullConverNullString(Object obj) throws Exception {
