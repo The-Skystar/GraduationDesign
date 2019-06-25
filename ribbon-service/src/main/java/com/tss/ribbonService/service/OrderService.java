@@ -2,6 +2,7 @@ package com.tss.ribbonService.service;
 
 import com.alibaba.fastjson.JSONObject;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import com.sun.org.apache.regexp.internal.REUtil;
 import com.tss.ribbonService.vo.ResultVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -87,6 +88,48 @@ public class OrderService {
         params.put("cost",cost);
         params.put("weight",weight);
         return restTemplate.getForObject("http://order-service/take?orderId={orderId}&cost={cost}&weight={weight}",ResultVO.class,params);
+    }
+
+    @HystrixCommand(fallbackMethod = "getFallback")
+    public ResultVO searchAll(String time, String conditions, String status) throws Exception{
+        Map<String,String> params = new HashMap<>();
+        params.put("conditions",conditions);
+        params.put("status",status);
+        params.put("time",time);
+        return restTemplate.getForObject("http://order-service/searchAll?status={status}&time={time}&conditions={conditions}",ResultVO.class,params);
+    }
+
+    @HystrixCommand(fallbackMethod = "getFallback")
+    public ResultVO costTotal(String time) throws Exception{
+        return restTemplate.getForObject("http://order-service/costTotal?time={1}",ResultVO.class,time);
+    }
+
+    @HystrixCommand(fallbackMethod = "getFallback")
+    public ResultVO costTotal(String startTime, String endTime) throws Exception{
+        Map<String,String> params = new HashMap<>();
+        params.put("startTime",startTime);
+        params.put("endTime",endTime);
+        return restTemplate.getForObject("http://order-service/costTotalBet?startTime={startTime}&endTime={endTime}",ResultVO.class,params);
+    }
+
+    @HystrixCommand(fallbackMethod = "getFallback")
+    public ResultVO noticePay(String orderId) throws Exception{
+        return restTemplate.getForObject("http://order-service/notice?orderId={1}",ResultVO.class,orderId);
+    }
+
+    @HystrixCommand(fallbackMethod = "getFallback")
+    public ResultVO sendOrder(String phone) throws Exception{
+        return restTemplate.getForObject("http://order-service/sendOrder?phone={1}",ResultVO.class,phone);
+    }
+
+    @HystrixCommand(fallbackMethod = "getFallback")
+    public ResultVO recOrder(String phone) throws Exception{
+        return restTemplate.getForObject("http://order-service/recOrder?phone={1}",ResultVO.class,phone);
+    }
+
+    @HystrixCommand(fallbackMethod = "getFallback")
+    public ResultVO comOrder(String phone) throws Exception{
+        return restTemplate.getForObject("http://order-service/comOrder?phone={1}",ResultVO.class,phone);
     }
 
     private ResultVO getFallback(String orderId,double cost,double weight){

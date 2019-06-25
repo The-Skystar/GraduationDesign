@@ -37,6 +37,7 @@ public class AddressController {
     @PostMapping("/upd")
     @ApiOperation(value = "修改用户地址信息")
     public ResultVO updAddress(Address address) throws Exception{
+        System.out.println(address.toString());
         return addressService.updAddress(address);
     }
 
