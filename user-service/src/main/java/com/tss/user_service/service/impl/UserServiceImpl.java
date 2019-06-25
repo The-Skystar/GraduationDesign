@@ -123,32 +123,30 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             resultVO.setMsg(ReturnStatusEnums.ACCOUNT_ERROR.getMsg());
             return resultVO;
         }else {
-            if (userList.size()==1&&!LoginStatusEnums.REGIST.getCode().equals(userList.get(0).getStatus())){
-                User user = userList.get(0);
-                if (LoginStatusEnums.LOGIN.getCode().equals(user.getStatus())){
-                    resultVO.setCode(ReturnStatusEnums.LOGGED.getCode());
-                    resultVO.setMsg(ReturnStatusEnums.LOGGED.getMsg());
-                    return resultVO;
-                }
-                if (LoginStatusEnums.CANCLE.getCode().equals(user.getStatus())){
-                    resultVO.setCode(ReturnStatusEnums.CANALED.getCode());
-                    resultVO.setMsg(ReturnStatusEnums.CANALED.getMsg());
-                    return resultVO;
-                }
-                if (LoginStatusEnums.LOCK.getCode().equals(user.getStatus())){
-                    resultVO.setCode(ReturnStatusEnums.FROZEN.getCode());
-                    resultVO.setMsg(ReturnStatusEnums.FROZEN.getMsg());
-                    return resultVO;
-                }
-                return resultVO;
-            }else {
+//            if (userList.size()==1&&!LoginStatusEnums.REGIST.getCode().equals(userList.get(0).getStatus())){
+//                User user = userList.get(0);
+//                if (LoginStatusEnums.LOGIN.getCode().equals(user.getStatus())){
+//                    resultVO.setCode(ReturnStatusEnums.LOGGED.getCode());
+//                    resultVO.setMsg(ReturnStatusEnums.LOGGED.getMsg());
+//                    return resultVO;
+//                }
+//                if (LoginStatusEnums.CANCLE.getCode().equals(user.getStatus())){
+//                    resultVO.setCode(ReturnStatusEnums.CANALED.getCode());
+//                    resultVO.setMsg(ReturnStatusEnums.CANALED.getMsg());
+//                    return resultVO;
+//                }
+//                if (LoginStatusEnums.LOCK.getCode().equals(user.getStatus())){
+//                    resultVO.setCode(ReturnStatusEnums.FROZEN.getCode());
+//                    resultVO.setMsg(ReturnStatusEnums.FROZEN.getMsg());
+//                    return resultVO;
+//                }
+//                return resultVO;
+//            }else {
                 if (userList.size()==1&&encryptUtil.MD5(pwd).equals(userList.get(0).getPwd())){
                     User user = userList.get(0);
                     String token = jwtToken.createToken(user.getUserId());
-                    if (redisUtil.get(user.getUserId())==null || redisUtil.get(user.getUserId()).length()==0){
-                        redisUtil.set(user.getUserId(),token);
-                        redisUtil.set(token,user.getUserId());
-                    }
+                    redisUtil.set(user.getUserId(),token);
+                    redisUtil.set(token,user.getUserId());
                     redisUtil.expire(user.getUserId(),validity);
                     redisUtil.expire(token,validity);
                     User cookieUser = new User();
@@ -166,7 +164,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                     resultVO.setMsg(ReturnStatusEnums.PWD_ERROR.getMsg());
                     return resultVO;
                 }
-            }
+//            }
         }
     }
 
@@ -216,10 +214,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             return resultVO;
         }else if (ver.equals(redisUtil.get(email))){
             String token = jwtToken.createToken(user.getUserId());
-            if (redisUtil.get(user.getUserId())==null || redisUtil.get(user.getUserId()).length()==0){
-                redisUtil.set(user.getUserId(),token);
-                redisUtil.set(token,user.getUserId());
-            }
+            redisUtil.set(user.getUserId(),token);
+            redisUtil.set(token,user.getUserId());
             redisUtil.expire(user.getUserId(),validity);
             redisUtil.expire(token,validity);
             user.setStatus(LoginStatusEnums.LOGIN.getCode());
