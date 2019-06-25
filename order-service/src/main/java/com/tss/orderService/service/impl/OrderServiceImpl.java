@@ -485,7 +485,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Orders> implement
                     pay = payMapper.selectById(order.getPayId());
                 orderVO.setOrderId(order.getOrderId());
                 orderVO.setUserId(order.getUserId());
-                orderVO.setStatus(order.getStatus());
+                orderVO.setStatus(this.convertStatus(order.getStatus()));
                 orderVO.setOrderTime(order.getOrderTime());
                 orderVO.setOrderCode(order.getOrderCode());
                 orderVO.setPay(pay);
@@ -500,7 +500,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Orders> implement
                 orderVOList.add(orderVO);
             }
         }
-        List<OrderVO> resultList = orderVOList.stream().filter(orderVO -> phone.equals(orderVO.getSender().getPhone())).collect(Collectors.toList());
+        List<OrderVO> resultList = orderVOList.stream().filter(orderVO -> phone.equals(orderVO.getUserId())).collect(Collectors.toList());
         resultVO.setCode(ReturnStatusEnums.SELECT_SUCCESS.getCode());
         resultVO.setMsg(ReturnStatusEnums.SELECT_SUCCESS.getMsg());
         resultVO.setData(resultList);
@@ -529,7 +529,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Orders> implement
                     pay = payMapper.selectById(order.getPayId());
                 orderVO.setOrderId(order.getOrderId());
                 orderVO.setUserId(order.getUserId());
-                orderVO.setStatus(order.getStatus());
+                orderVO.setStatus(this.convertStatus(order.getStatus()));
                 orderVO.setOrderTime(order.getOrderTime());
                 orderVO.setOrderCode(order.getOrderCode());
                 orderVO.setPay(pay);
@@ -572,7 +572,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Orders> implement
                     pay = payMapper.selectById(order.getPayId());
                 orderVO.setOrderId(order.getOrderId());
                 orderVO.setUserId(order.getUserId());
-                orderVO.setStatus(order.getStatus());
+                orderVO.setStatus(this.convertStatus(order.getStatus()));
                 orderVO.setOrderTime(order.getOrderTime());
                 orderVO.setOrderCode(order.getOrderCode());
                 orderVO.setPay(pay);
@@ -659,5 +659,30 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Orders> implement
         }
     }
 
+    public String convertStatus(String status){
+        if (OrderStatus.DROP_ORDER.getCode().equals(status)){
+            return OrderStatus.DROP_ORDER.getValue();
+        }
+        if (OrderStatus.RECEIVE.getCode().equals(status)){
+            return OrderStatus.RECEIVE.getValue();
+        }
+        if (OrderStatus.TAKE.getCode().equals(status)){
+            return OrderStatus.TAKE.getValue();
+        }
+        if (OrderStatus.PAY.getCode().equals(status)){
+            return OrderStatus.PAY.getValue();
+        }
+        if (OrderStatus.TRANSPORT.getCode().equals(status)){
+            return OrderStatus.TRANSPORT.getValue();
+        }
+        if (OrderStatus.RECEIPT.getCode().equals(status)){
+            return OrderStatus.RECEIPT.getValue();
+        }
+        if (OrderStatus.DIFFICULT.getCode().equals(status)){
+            return OrderStatus.DIFFICULT.getValue();
+        }else {
+            return OrderStatus.ABANNDONED.getValue();
+        }
+    }
 
 }
